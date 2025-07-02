@@ -1,12 +1,20 @@
 import machine  # type:ignore
 import neopixel #type:ignore
-import src.reyax
+try:
+    import src.reyax as reyax
+except:
+    import reyax
+    print("!couldnt import reyax.py!")
+    
 import os
 import time
 
 servo = machine.PWM(machine.Pin(17))
 servo.freq(50)  # 50Hz for servo control
 jewel = neopixel.NeoPixel(machine.Pin(16, machine.Pin.OUT), 7) #7 is num of leds
+servo_last_angle = 180
+
+
 
 def jewel_test():
     jewel[0] = (0, 255, 0)
@@ -19,7 +27,7 @@ def jewel_test():
     jewel.write()
     
     time.sleep(5)
-
+    
     jewel[0] = (0,0,0)
     jewel[1] = (0,0,0)
     jewel[2] = (0,0,0)
@@ -30,11 +38,20 @@ def jewel_test():
     jewel.write()
     print('jewel test done')
 
-def setup_file_system():
+
+
+def jewel_set_all(r, g, b):
+    for i in range(0, 7):
+        jewel[i] = (r,g,b)
+    jewel.write()
+
+
+
+def file_system_setup():
     filestofind = ['reyax.py', 'utils.py', 'boot.py']
     for name in filestofind:
         if name not in os.listdir():
-            print("!WARNING! "+name+" was not found.")
+            print("!WARNING! "+name+" was not found in core directory")
     if 'src' not in os.listdir():
         os.mkdir('src')
     try: 
@@ -46,41 +63,67 @@ def setup_file_system():
     except:
         print('!WARNING! utils.py has not been relocated')
 
-def show_file_system():
-    traverse('', 1)
 
 
-def traverse(path, indent):
+def file_system_show():
+    __traverse('', 1)
+
+
+
+def __traverse(path, indent):
     for item in os.listdir(path):
         fullpath = path+'/'+item
         if not item.endswith('.py'):
             print('  '*indent + fullpath)
-            traverse(fullpath, indent+1)
+            __traverse(fullpath, indent+1)
         elif item.endswith('.py'):
             print('  '*indent + fullpath)
 
 
+
 def servo_test():    
     for angle in range(0, 181, 30):
-        set_angle(angle, servo)
+        servo_set_angle(angle)
         time.sleep(0.1)
     for angle in range(180, -1, -30):
-        set_angle(angle, servo)
+        servo_set_angle(angle)
         time.sleep(0.1)
     print('motor test')
 
-def set_angle(angle, servo):
+
+
+def servo_set_angle(angle):
     # Convert angle (0–180) to duty_u16 value (~1638 to 8192)
     min_duty = 1638  # 1ms pulse (5% of 20ms)
     max_duty = 8192  # 2ms pulse (10% of 20ms)
     duty = int(min_duty + (angle / 180) * (max_duty - min_duty))
     servo.duty_u16(duty)
 
-def setup_connection(self_address):
+servo_set_angle(180)
+
+
+
+def servo_rotate(to_angle):
+    global servo_last_angle
+    print('rotating form', servo_last_angle, 'to', to_angle)
+    if to_angle > servo_last_angle:
+        for deg in range(servo_last_angle, to_angle):
+            servo_set_angle(deg)
+            time.sleep(0.01)
+    else:
+        for deg in range(servo_last_angle, to_angle, -1):
+            servo_set_angle(deg)
+            time.sleep(0.01)
+    servo_last_angle = to_angle
+    print('rotated')
+
+
+
+def connection_setup(self_address):
     try:
         uart = machine.UART(1, baudrate=115200, tx=machine.Pin(4), rx=machine.Pin(5))
-        rylr = src.reyax.RYLR998(uart)
-        rylr.address = self_address #9999 id reserved for central unit; format of xxyy where xx branch no, yy node no
+        rylr = reyax.RYLR998(uart)
+        rylr.address = self_address #9999 id reserved for host, 9998 for center; format of xxyy where xx branch no, yy node no
         if not rylr.pulse:
             print('!WARNING! LoRa module test failed')
     except Exception as e:
@@ -93,5 +136,7 @@ def setup_connection(self_address):
     msg = "Module address #" + str(rylr.address) + " has connected to the network."
     rylr.send(9999, msg.encode("ascii"))
     return rylr
+
+
 
 
