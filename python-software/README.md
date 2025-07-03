@@ -1,4 +1,8 @@
-```python
-utils.py
+open terminal, navigate to the `runme.sh` directory, then make it executable with
+```bash
+chmod +x runme.sh
 ```
-stuff
+then run it with
+```bash
+./runme.sh
+```

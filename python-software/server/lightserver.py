@@ -1,6 +1,12 @@
-import pythonosc
-import src.wrapper as wrapper
+from pythonosc.dispatcher import Dispatcher
+from pythonosc.osc_server import BlockingOSCUDPServer
+import src.pyserialwrapper as pyserialwrapper
 import src.reyax as reyax
+from src.Mesh import *
+import src.utils as utils
+import time
+import random
+import code
 
 
 
@@ -8,14 +14,15 @@ import src.reyax as reyax
 port = '/dev/tty.placeholder'
 baudrate = 115200
 try:
-    uart = wrapper.pyserialUARTwrapper(port, baudrate)
+    uart = pyserialwrapper.pyserialUARTwrapper(port, baudrate)
     rylr = reyax.RYLR998(uart)
     if not rylr.pulse:
         print('!WARNING! LoRa module test failed')
 except Exception as e:
-    print(f'!WARNING! Connection to LoRa at {port} with baudrate {baudrate} failed with the following: \n\n{e}')
+    print(f'!WARNING! Connection to LoRa at {port} with baudrate {baudrate} failed with the following: \n{e}')
 #--
-
+#setup existing mesh of nodes
+thismesh = Mesh([[0, 1]])
 
 
 def print_osc(address, *args):
@@ -31,13 +38,21 @@ def print_osc(address, *args):
 def preset_handler(address, *args): #should get str:preser_name
     match args[0]:
         case 'off':
-            pass
+            print('GOT: OFF')
+            utils.send_all_nodes(thismesh, rylr, 'presetoff')
+
         case 'test':
-            rylr.send(f'all setallleds {str(args[1])} {str(args[2])} {str(args[3])}')
+            print('GOT: TEST')
+            utils.send_all_nodes(thismesh, rylr, 'presettest')
+            
         case 'spotlight':
-            pass
+            print("GOT: SPOTLIGHT")
+            utils.send_all_nodes(thismesh, rylr, 'presetspotlight')
+
         case 'nature':
-            pass
+            print('GOT: NATURE')
+            utils.send_all_nodes(thismesh, rylr, 'setallleds 116 163 66')
+
         case 'dystopia':
             pass
         case 'irl':
@@ -53,19 +68,21 @@ def transient_handler(address, *args): #should get int:duration_ms, ?:intensity,
     print_osc(address, *args)
 
 
-
-
-
 ip ="127.0.0.1" #localhost
-port = 53000 #qlab listens to this port for feedback by defualt
+port = 8080 #qlab listens to this port for feedback by defualt
 
-dispatcher = pythonosc.dispatcher.Dispatcher() #create disptcher for message routing 
+dispatcher = Dispatcher() #create disptcher for message routing 
 dispatcher.map("/flowerlights/preset", preset_handler) #map the OSC commands to handler functions 
 dispatcher.map("/flowerlights/fadein", fadein_handler)
 dispatcher.map("/flowerlights/transition", transition_handler)
 dispatcher.map("/flowerlights/transient", transient_handler)
 
-server = pythonosc.osc_server.BlockingOSCUDPServer((ip, port), dispatcher) #blocking server as in in blocks the main thread until program is aborted
+server = BlockingOSCUDPServer((ip, port), dispatcher) #blocking server as in in blocks the main thread until program is aborted
 
 print("! SERVER STARTED ON " + ip + ":" + str(port) + "! Listening in progress...")
 server.serve_forever() # !!!blocks the main thread
+
+#TODO: implement starting server on adifferent threading to enable repl acess later to pin gte nodes for example and other debug
+#print("> Setup finished, opening REPL for debug...")
+# Start interactive shell
+#code.interact(local=locals())

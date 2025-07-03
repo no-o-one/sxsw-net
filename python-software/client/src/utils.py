@@ -7,13 +7,14 @@ except:
     print("!couldnt import reyax.py!")
     
 import os
+import random
 import time
 
 servo = machine.PWM(machine.Pin(17))
 servo.freq(50)  # 50Hz for servo control
 jewel = neopixel.NeoPixel(machine.Pin(16, machine.Pin.OUT), 7) #7 is num of leds
 servo_last_angle = 180
-
+current_animation = 'off' #track the current animation so that it can be broken out of
 
 
 def jewel_test():
@@ -43,6 +44,12 @@ def jewel_test():
 def jewel_set_all(r, g, b):
     for i in range(0, 7):
         jewel[i] = (r,g,b)
+    jewel.write()
+
+
+def jewel_set(list_of_tups): #takes a list of tuples of rg values for each led
+    for i in range(0,7):
+        jewel[i] = list_of_tups[i]
     jewel.write()
 
 
@@ -99,6 +106,7 @@ def servo_set_angle(angle):
     duty = int(min_duty + (angle / 180) * (max_duty - min_duty))
     servo.duty_u16(duty)
 
+
 servo_set_angle(180)
 
 
@@ -138,5 +146,82 @@ def connection_setup(self_address):
     return rylr
 
 
+#ANIMATION RENDERERS--- will also have to actively check the current_animation because threading is a headache
+def render_test_animation(speed=0.1):
+    global current_animation
+    for intensity in range(0, 256):
+        if current_animation == 'test':
+            jewel_set_all(intensity, 0, 0)
+            time.sleep(speed)
+        else:
+            break
+    for intensity in range(255, -1, -1):
+        if current_animation == 'test':
+            jewel_set_all(intensity, 0, 0)
+            time.sleep(speed) 
+        else: 
+            break
+
+    for intensity in range(0, 256):
+        if current_animation == 'test':
+            jewel_set_all(0, intensity, 0)
+            time.sleep(speed)
+        else:
+            break
+    for intensity in range(255, -1, -1):
+        if current_animation == 'test':
+            jewel_set_all(0, intensity, 0)
+            time.sleep(speed)  
+        else: 
+            break
+
+    for intensity in range(0, 256):
+        if current_animation == 'test':
+            jewel_set_all(0, 0, intensity)
+            time.sleep(speed)
+        else:
+            break
+    for intensity in range(255, -1, -1):
+        if current_animation == 'test':
+            jewel_set_all(0, 0, intensity)
+            time.sleep(speed)  
+        else:
+            break
 
 
+def render_spotlight_animation():
+    while current_animation == 'spotlight':
+        jewel_set_all(50,50,50)
+
+        if not current_animation == 'test':
+            break
+            
+        to = time.sleep(random.randint(1, 10))
+        for wait in range(0, to, 0.2):
+            time.sleep(wait)
+            if not current_animation == 'test':
+                break
+        
+        jewel_set_all(0,0,0)
+
+        to = time.sleep(random.randint(1, 10))
+        for wait in range(0, to, 0.2):
+            time.sleep(wait)
+            if not current_animation == 'test':
+                break
+    
+        jewel_set_all(100,100,100)
+
+        to = time.sleep(random.randint(1, 10))
+        for wait in range(0, to, 0.2):
+            time.sleep(wait)
+            if not current_animation == 'test':
+                break
+        
+        jewel_set_all(0,0,0)
+
+        to = time.sleep(random.randint(1, 10))
+        for wait in range(0, to, 0.2):
+            time.sleep(wait)
+            if not current_animation == 'test':
+                break

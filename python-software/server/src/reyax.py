@@ -10,8 +10,12 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-#import machine
+#import machine < here isnt needed since were on the server side; the serial is handled by pyserial thorughpyserialwrapper
 import time
+
+#emulating the micropythons ticks_ms() function
+def ticks_ms():
+    return int(time.time() * 1000)
 
 class ReceivedMessage:
     def __init__(self) -> None:
@@ -156,9 +160,9 @@ class RYLR998:
         self._uart.write("AT+RESET\r\n".encode("ascii"))
 
         # wait for response
-        start:int = time.ticks_ms()
+        start:int = ticks_ms()
         full_response:bytes = bytes()
-        while (time.ticks_ms() - start) < 5000: # maximum time we will wait for the reset to be confirmed is 5 seconds... but it should be WAY quicker than that.
+        while (ticks_ms() - start) < 5000: # maximum time we will wait for the reset to be confirmed is 5 seconds... but it should be WAY quicker than that.
             if self._uart.any() > 0: # there is something to read
                 data = self._uart.read()
                 full_response = full_response + data
@@ -288,9 +292,9 @@ class RYLR998:
         self._uart.write(command)
 
         # wait for a response, but also wait for an appropriate response (ignore + cache any received messages)
-        started_waiting_at_ticks_ms:int = time.ticks_ms()
+        started_waiting_at_ticks_ms:int = ticks_ms()
         response:bytes = None # will contain the actual response we will return back.
-        while (time.ticks_ms() - started_waiting_at_ticks_ms) < response_timeout_ms and response == None:
+        while (ticks_ms() - started_waiting_at_ticks_ms) < response_timeout_ms and response == None:
             if self._uart.any() > 0: # if there are bytes to read
                 new_bytes = self._uart.read() # read the bytes
                 if new_bytes.startswith("+RCV".encode("ascii")): # if the new bytes we just received are actually a message we just received (not a direct response to the command we just sent), add it to the buffer for us to get to it later
