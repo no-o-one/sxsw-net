@@ -13,9 +13,17 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 #import machine < here isnt needed since were on the server side; the serial is handled by pyserial thorughpyserialwrapper
 import time
 
-#emulating the micropythons ticks_ms() function
+#emulating the micropythons functions
 def ticks_ms():
     return int(time.time() * 1000)
+
+def sleep_ms(milliseconds):
+    start_time = time.time() * 1000  # Current time in milliseconds
+    end_time = start_time + milliseconds
+    
+    while time.time() * 1000 < end_time:
+        pass  # Busy-wait loop to mimic the sleep behavior
+
 
 class ReceivedMessage:
     def __init__(self) -> None:
@@ -302,7 +310,7 @@ class RYLR998:
                 else:
                     response = new_bytes # This is our response! So save it.
             else:
-                time.sleep_ms(1) # wait 1 ms
+                time.wait(0.001) # wait 1 ms
 
         # if there are not any new bytes in the internal buf, it failed!
         if response == None:

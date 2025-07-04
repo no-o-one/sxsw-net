@@ -43,7 +43,7 @@ def preset_handler(address, *args): #should get str:preser_name
 
         case 'test':
             print('GOT: TEST')
-            utils.send_all_nodes(thismesh, rylr, 'presettest')
+            utils.send_all_nodes(thismesh, ryflr, 'presettest')
             
         case 'spotlight':
             print("GOT: SPOTLIGHT")

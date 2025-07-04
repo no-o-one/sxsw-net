@@ -5,7 +5,7 @@ set -e
 
 #set up variables
 VENV_DIR="venv"
-APP_FILE="app.py"
+APP_FILE="lightserver.py"
 
 #create virtual environment if it doesn't exist
 if [ ! -d "$VENV_DIR" ]; then
