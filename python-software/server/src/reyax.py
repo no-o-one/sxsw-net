@@ -300,7 +300,7 @@ class RYLR998:
         response:bytes = None # will contain the actual response we will return back.
         while (ticks_ms() - started_waiting_at_ticks_ms) < response_timeout_ms and response == None:
             if self._uart.any() > 0: # if there are bytes to read
-                new_bytes = self._uart.read() # read the bytes
+                new_bytes = self._uart.read_until(b'\r\n') # read the bytes
                 if new_bytes.startswith("+RCV".encode("ascii")): # if the new bytes we just received are actually a message we just received (not a direct response to the command we just sent), add it to the buffer for us to get to it later
                     self._rxbuf += new_bytes # add it to the buffer for us to get later. It is not the response to our command we were looking for.
                 else:
