@@ -147,7 +147,7 @@ def connection_setup(self_address):
 
 
 #ANIMATION RENDERERS--- will also have to actively check the current_animation because threading is a headache
-def render_test_animation(speed=0.1):
+def render_test_animation(speed=0.001):
     global current_animation
     for intensity in range(0, 256):
         if current_animation == 'test':
@@ -187,7 +187,7 @@ def render_test_animation(speed=0.1):
             time.sleep(speed)  
         else:
             break
-
+    current_animation = 'off'
 
 def render_spotlight_animation():
     while current_animation == 'spotlight':
@@ -225,3 +225,4 @@ def render_spotlight_animation():
             time.sleep(wait)
             if not current_animation == 'test':
                 break
+

@@ -38,25 +38,29 @@ def listen_to_host(): #also tracks current
     while 1:
         received_msg = rylr.receive()
         if not received_msg == None:
+            print(received_msg)
             data_parsed = received_msg.data.decode("ascii").split()
             #check if addressed to self
-            if received_msg.address == self_id:
+            if data_parsed[0] == str(self_id) or data_parsed[0] == 'all':
                 #check received via imitating match-case for micropython does not have it :(
-                if data_parsed[0] == 'setallleds': #args > int:R, int:G, int:B
+                if data_parsed[1] == 'setallleds': #args > int:R, int:G, int:B
                     utils.jewel_set_all(int(data_parsed[1]), int(data_parsed[2]), int(data_parsed[3]))
 
-                elif data_parsed[0] == 'presetoff':
+                elif data_parsed[1] == 'presetoff':
+                    print('got off')
                     utils.current_animation = 'off'
                     utils.jewel_set_all(0, 0, 0)
 
-                elif data_parsed[0] == 'presettest':
+                elif data_parsed[1] == 'presettest':
+                    print('got test')
                     utils.current_animation = 'test'
                     utils.render_test_animation()
                 
-                elif data_parsed[0] == 'presetspotlight':
+                elif data_parsed[1] == 'presetspotlight':
+                    print('got spotlight')
                     utils.current_animation = 'spotlight'
                     utils.render_spotlight_animation()
-
+                
         time.sleep(0.1)
 
 
@@ -69,5 +73,6 @@ utils.file_system_setup()
 
 print('> Starting the second thread')#only two per pico are possible
 _thread.start_new_thread(listen_to_host, ())#empty tuple is args
+
 
 
