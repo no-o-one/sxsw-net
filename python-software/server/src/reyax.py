@@ -15,7 +15,7 @@ import time
 
 #emulating the micropythons functions
 def ticks_ms():
-    return int(time.monotonic_ns() * 1000000)
+    return int(time.monotonic() * 1000)
 
 def sleep_ms(ms):
     time.sleep(ms/1000.0)
@@ -280,7 +280,7 @@ class RYLR998:
         if all_bytes != None:
             self._rxbuf += all_bytes
     
-    def _command_response(self, command:bytes, response_timeout_ms:int = 500)-> bytes:
+    def _command_response(self, command:bytes, response_timeout_ms:int = 1000)-> bytes:
         """Sends a byte sequence (AT command) to the RYLR988 module, and collects the response while still preserving any pre-existing bytes in the internal Rx buffer."""
 
         # the _command_response() function should never return a "+RCV" response. +RCV is the message that shows up when a message was received.
@@ -294,13 +294,17 @@ class RYLR998:
 
         # send command
         self._uart.write(command)
+        sleep_ms(10) #allow te module to respond to avoid timeout
 
         # wait for a response, but also wait for an appropriate response (ignore + cache any received messages)
         started_waiting_at_ticks_ms:int = ticks_ms()
         response:bytes = None # will contain the actual response we will return back.
+        #print(f'!DEBUG! strarting timer at {started_waiting_at_ticks_ms}')
         while (ticks_ms() - started_waiting_at_ticks_ms) < response_timeout_ms and response == None:
+            #print(f'!DEBUG! looping at {ticks_ms()}')
             if self._uart.any() > 0: # if there are bytes to read
-                new_bytes = self._uart.read_until(b'\r\n') # read the bytes
+                new_bytes = self._uart.read() # read the bytes
+                print(f'!DEBUG! got {new_bytes!r}')
                 if new_bytes.startswith("+RCV".encode("ascii")): # if the new bytes we just received are actually a message we just received (not a direct response to the command we just sent), add it to the buffer for us to get to it later
                     self._rxbuf += new_bytes # add it to the buffer for us to get later. It is not the response to our command we were looking for.
                 else:

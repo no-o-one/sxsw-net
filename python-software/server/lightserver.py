@@ -11,7 +11,7 @@ import code
 
 
 #LORA MODULE SETUP
-port = '/dev/tty.placeholder'
+port = '/dev/tty.usbserial-16'
 baudrate = 115200
 try:
     uart = pyserialwrapper.pyserialUARTwrapper(port, baudrate)
@@ -39,11 +39,14 @@ def preset_handler(address, *args): #should get str:preser_name
     match args[0]:
         case 'off':
             print('GOT: OFF')
-            utils.send_all_nodes(thismesh, rylr, 'presetoff')
+            utils.send_all_nodes(thismesh, rylr, '1 presetoff')
 
         case 'test':
             print('GOT: TEST')
-            utils.send_all_nodes(thismesh, ryflr, 'presettest')
+##            utils.send_all_nodes(thismesh, rylr, 'presettest 1')
+            rylr.send(1, '1 presettest'.encode('ascii'))
+            rylr.send(0, 'all presettest'.encode('ascii'))
+            
             
         case 'spotlight':
             print("GOT: SPOTLIGHT")

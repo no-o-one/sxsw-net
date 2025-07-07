@@ -11,7 +11,7 @@ class pyserialUARTwrapper:
         return self.serial.write(data)
 
     def read(self, size=1):
-        return self.serial.read(size)
+        return self.serial.read_all()
 
     def any(self):
         return self.serial.in_waiting
