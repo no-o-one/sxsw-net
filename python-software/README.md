@@ -6,3 +6,4 @@ then run it with
 ```bash
 ./runme.sh
 ```
+check the lora module port first via running `ls /dev/tty.*`

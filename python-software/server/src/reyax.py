@@ -15,14 +15,10 @@ import time
 
 #emulating the micropythons functions
 def ticks_ms():
-    return int(time.time() * 1000)
+    return int(time.monotonic_ns() * 1000000)
 
-def sleep_ms(milliseconds):
-    start_time = time.time() * 1000  # Current time in milliseconds
-    end_time = start_time + milliseconds
-    
-    while time.time() * 1000 < end_time:
-        pass  # Busy-wait loop to mimic the sleep behavior
+def sleep_ms(ms):
+    time.sleep(ms/1000.0)
 
 
 class ReceivedMessage:
@@ -310,7 +306,7 @@ class RYLR998:
                 else:
                     response = new_bytes # This is our response! So save it.
             else:
-                time.wait(0.001) # wait 1 ms
+                sleep_ms(1) # wait 1 ms
 
         # if there are not any new bytes in the internal buf, it failed!
         if response == None:
