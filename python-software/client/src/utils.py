@@ -42,9 +42,11 @@ def jewel_test():
 
 
 def jewel_set_all(r, g, b):
+    global jewel
     for i in range(0, 7):
         jewel[i] = (r,g,b)
-    jewel.write()
+        jewel.write()
+    
 
 
 def jewel_set(list_of_tups): #takes a list of tuples of rg values for each led

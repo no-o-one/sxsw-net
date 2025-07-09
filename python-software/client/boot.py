@@ -15,7 +15,7 @@ import _thread
 
 lock = _thread.allocate_lock()    
 host_id = 9999
-self_id = 1 #0001
+self_id = 2 #0001
 led_builtin = machine.Pin(25, machine.Pin.OUT)
 utils.current_animation = 'off'
 
@@ -52,6 +52,11 @@ def listen_to_host(): #also tracks current
                     lock.acquire()
                     utils.current_animation = 'off'
                     lock.release()
+                    utils.jewel_set_all(0,0,0)
+                    utils.servo_rotate(40)
+                    utils.jewel_set_all(0,0,0)
+                    utils.jewel_set_all(0,0,0)
+                
 
                 elif data_parsed[1] == 'presettest':
                     print('got test')
@@ -64,24 +69,41 @@ def listen_to_host(): #also tracks current
                     lock.acquire()
                     utils.current_animation = 'spotlight'
                     lock.release()
+                    utils.servo_rotate(40)
+                    utils.jewel_set_all(0, 0, 0)
+                    utils.jewel_set_all(90,90,90)
+                    utils.servo_rotate(180)
                 
                 elif data_parsed[1] == 'presetnature':
                     print('got spotlight')
                     lock.acquire()
                     utils.current_animation = 'nature'
                     lock.release()
+                    print('got nature')
+                    utils.servo_rotate(40)
+                    utils.jewel_set_all(0, 0, 0)
+                    utils.jewel_set_all(180,250,40)
+                    utils.servo_rotate(180)
                 
                 elif data_parsed[1] == 'presetdystopia':
                     print('got spotlight')
                     lock.acquire()
                     utils.current_animation = 'dystopia'
                     lock.release()
+                    utils.servo_rotate(40, 0.005)
+                    utils.jewel_set_all(0, 0, 0)
+                    utils.jewel_set_all(250,0,0)
+                    
 
                 elif data_parsed[1] == 'presetirl':
                     print('got spotlight')
                     lock.acquire()
                     utils.current_animation = 'irl'
                     lock.release()
+                    utils.servo_rotate(40)
+                    utils.jewel_set_all(0, 0, 0)
+                    utils.jewel_set_all(180,10,190)
+                    utils.servo_rotate(180)
                     
                 
         time.sleep(0.1)
@@ -122,11 +144,13 @@ rylr = utils.connection_setup(self_id)
 print("> Setting up the file system")
 utils.file_system_setup()
 
-print('> Starting the animation tracking thread')#only two per pico are possible
-_thread.start_new_thread(listen_to_anim_state, ())#empty tuple is args
-
 print('> Starting the server thread')#only two per pico are possible
 _thread.start_new_thread(listen_to_host, ())#empty tuple is args
 
+# print('> Starting the animation tracking thread')
+# for i in range(0, 500): 
+#     listen_to_anim_state()
+#     time.sleep(0.1)
+    
 
 
