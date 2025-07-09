@@ -44,22 +44,26 @@ def preset_handler(address, *args): #should get str:preser_name
         case 'test':
             print('GOT: TEST')
 ##            utils.send_all_nodes(thismesh, rylr, 'presettest 1')
-            rylr.send(1, '1 presettest'.encode('ascii'))
+##            rylr.send(1, '1 presettest'.encode('ascii'))
             rylr.send(0, 'all presettest'.encode('ascii'))
             
             
         case 'spotlight':
             print("GOT: SPOTLIGHT")
-            utils.send_all_nodes(thismesh, rylr, 'presetspotlight')
+            rylr.send(0, 'all presetspotlight'.encode('ascii'))
 
         case 'nature':
             print('GOT: NATURE')
-            utils.send_all_nodes(thismesh, rylr, 'setallleds 116 163 66')
+            rylr.send(0, 'all presetnature'.encode('ascii'))
 
         case 'dystopia':
-            pass
+            print('GOT: DYST')
+            rylr.send(0, 'all presetdystopia'.encode('ascii'))
+
         case 'irl':
-            pass
+            print('GOT: IRL')
+            rylr.send(0, 'all presetirl'.encode('ascii'))
+
 
 def fadein_handler(address, *args): #should get str:preset_name, int:fade_ms
     print_osc(address, *args)

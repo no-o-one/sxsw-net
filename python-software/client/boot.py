@@ -12,7 +12,8 @@ except:
     import utils
 import _thread
 
-    
+
+lock = _thread.allocate_lock()    
 host_id = 9999
 self_id = 1 #0001
 led_builtin = machine.Pin(25, machine.Pin.OUT)
@@ -48,20 +49,70 @@ def listen_to_host(): #also tracks current
 
                 elif data_parsed[1] == 'presetoff':
                     print('got off')
+                    lock.acquire()
                     utils.current_animation = 'off'
-                    utils.jewel_set_all(0, 0, 0)
+                    lock.release()
 
                 elif data_parsed[1] == 'presettest':
                     print('got test')
+                    lock.acquire()
                     utils.current_animation = 'test'
-                    utils.render_test_animation()
+                    lock.release()
                 
                 elif data_parsed[1] == 'presetspotlight':
                     print('got spotlight')
+                    lock.acquire()
                     utils.current_animation = 'spotlight'
-                    utils.render_spotlight_animation()
+                    lock.release()
+                
+                elif data_parsed[1] == 'presetnature':
+                    print('got spotlight')
+                    lock.acquire()
+                    utils.current_animation = 'nature'
+                    lock.release()
+                
+                elif data_parsed[1] == 'presetdystopia':
+                    print('got spotlight')
+                    lock.acquire()
+                    utils.current_animation = 'dystopia'
+                    lock.release()
+
+                elif data_parsed[1] == 'presetirl':
+                    print('got spotlight')
+                    lock.acquire()
+                    utils.current_animation = 'irl'
+                    lock.release()
+                    
                 
         time.sleep(0.1)
+
+
+def listen_to_anim_state():
+    lock.acquire()
+    current_anim = utils.current_animation 
+    lock.release()
+
+    if current_anim == 'off':
+        utils.jewel_set_all(0, 0, 0)
+        utils.servo_rotate(40)
+
+    elif current_anim == 'test':
+        utils.render_test_animation()
+
+    elif current_anim == 'spotlight':
+       utils.render_test_animation()
+
+    elif current_anim == 'nature':
+       utils.render_nature_animation()
+
+    elif current_anim == 'irl':
+       utils.render_irl_animation()
+
+    elif current_anim == 'dystopia':
+       utils.render_dystopia_animation()
+
+    time.sleep(0.1)
+
 
 
 
@@ -71,7 +122,10 @@ rylr = utils.connection_setup(self_id)
 print("> Setting up the file system")
 utils.file_system_setup()
 
-print('> Starting the second thread')#only two per pico are possible
+print('> Starting the animation tracking thread')#only two per pico are possible
+_thread.start_new_thread(listen_to_anim_state, ())#empty tuple is args
+
+print('> Starting the server thread')#only two per pico are possible
 _thread.start_new_thread(listen_to_host, ())#empty tuple is args
 
 

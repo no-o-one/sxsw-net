@@ -107,21 +107,19 @@ def servo_set_angle(angle):
     servo.duty_u16(duty)
 
 
-servo_set_angle(180)
 
 
-
-def servo_rotate(to_angle):
+def servo_rotate(to_angle, speed = 0.01):
     global servo_last_angle
     print('rotating form', servo_last_angle, 'to', to_angle)
     if to_angle > servo_last_angle:
         for deg in range(servo_last_angle, to_angle):
             servo_set_angle(deg)
-            time.sleep(0.01)
+            time.sleep(speed)
     else:
         for deg in range(servo_last_angle, to_angle, -1):
             servo_set_angle(deg)
-            time.sleep(0.01)
+            time.sleep(speed)
     servo_last_angle = to_angle
     print('rotated')
 
@@ -190,39 +188,122 @@ def render_test_animation(speed=0.001):
     current_animation = 'off'
 
 def render_spotlight_animation():
+    global current_animation
     while current_animation == 'spotlight':
         jewel_set_all(50,50,50)
+        servo_rotate(80, 0.005)
 
-        if not current_animation == 'test':
+        if not current_animation == 'spotlight':
             break
             
         to = time.sleep(random.randint(1, 10))
         for wait in range(0, to, 0.2):
             time.sleep(wait)
-            if not current_animation == 'test':
+            if not current_animation == 'spotlight':
                 break
         
         jewel_set_all(0,0,0)
+        servo_rotate(140, 0.005)
 
         to = time.sleep(random.randint(1, 10))
         for wait in range(0, to, 0.2):
             time.sleep(wait)
-            if not current_animation == 'test':
+            if not current_animation == 'spotlight':
                 break
     
         jewel_set_all(100,100,100)
+        servo_rotate(80, 0.005)
 
         to = time.sleep(random.randint(1, 10))
         for wait in range(0, to, 0.2):
             time.sleep(wait)
-            if not current_animation == 'test':
+            if not current_animation == 'spotlight':
                 break
         
         jewel_set_all(0,0,0)
+        servo_rotate(140, 0.005)
 
         to = time.sleep(random.randint(1, 10))
         for wait in range(0, to, 0.2):
             time.sleep(wait)
-            if not current_animation == 'test':
+            if not current_animation == 'spotlight':
                 break
 
+
+
+def render_dystopia_animation():
+    global current_animation
+    while current_animation == 'dystopia':
+        jewel_set_all(50,50,50)
+        servo_rotate(80, 0.005)
+
+        if not current_animation == 'dystopia':
+            break
+            
+        to = time.sleep(random.randint(1, 10))
+        for wait in range(0, to, 0.2):
+            time.sleep(wait)
+            if not current_animation == 'dystopia':
+                break
+        
+        jewel_set_all(150,0,0)
+        servo_rotate(140, 0.005)
+
+        to = time.sleep(random.randint(1, 10))
+        for wait in range(0, to, 0.2):
+            time.sleep(wait)
+            if not current_animation == 'dystopia':
+                break
+    
+        jewel_set_all(100,100,100)
+        servo_rotate(80, 0.005)
+
+        to = time.sleep(random.randint(1, 10))
+        for wait in range(0, to, 0.2):
+            time.sleep(wait)
+            if not current_animation == 'dystopia':
+                break
+        
+        jewel_set_all(100,0,0)
+        servo_rotate(140, 0.005)
+
+        to = time.sleep(random.randint(1, 10))
+        for wait in range(0, to, 0.2):
+            time.sleep(wait)
+            if not current_animation == 'dystopia':
+                break
+
+
+def render_nature_animation():
+    global current_animation
+    jewel_set_all(111,158,93)
+    if not current_animation == 'nature':
+        pass
+    servo_rotate(180, 0.02)
+    if not current_animation == 'nature':
+        pass
+
+    jewel_set_all(111,148,113)
+    if not current_animation == 'nature':
+        pass
+    servo_rotate(140, 0.02)
+    if not current_animation == 'nature':
+        pass
+
+
+
+def render_irl_animation():
+    global current_animation
+    jewel_set_all(103,80,250)
+    if not current_animation == 'irl':
+        pass
+    servo_rotate(180, 0.02)
+    if not current_animation == 'irl':
+        pass
+
+    jewel_set_all(80,90,250)
+    if not current_animation == 'irl':
+        pass
+    servo_rotate(140, 0.02)
+    if not current_animation == 'irl':
+        pass
