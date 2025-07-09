@@ -39,7 +39,10 @@ def preset_handler(address, *args): #should get str:preser_name
     match args[0]:
         case 'off':
             print('GOT: OFF')
-            utils.send_all_nodes(thismesh, rylr, '1 presetoff')
+            rylr.send(1, 'all presetoff'.encode('ascii'))
+            rylr.send(2, 'all presetoff'.encode('ascii'))
+            rylr.send(3, 'all presetoff'.encode('ascii'))
+            
 
         case 'test':
             print('GOT: TEST')
@@ -50,19 +53,30 @@ def preset_handler(address, *args): #should get str:preser_name
             
         case 'spotlight':
             print("GOT: SPOTLIGHT")
-            rylr.send(0, 'all presetspotlight'.encode('ascii'))
+            rylr.send(1, 'all presetspotlight'.encode('ascii'))
+            rylr.send(2, 'all presetspotlight'.encode('ascii'))
+            rylr.send(3, 'all presetspotlight'.encode('ascii'))
 
         case 'nature':
             print('GOT: NATURE')
-            rylr.send(0, 'all presetnature'.encode('ascii'))
+            rylr.send(1, 'all presetnature'.encode('ascii'))
+            rylr.send(2, 'all presetnature'.encode('ascii'))
+            rylr.send(3, 'all presetnature'.encode('ascii'))
 
         case 'dystopia':
             print('GOT: DYST')
-            rylr.send(0, 'all presetdystopia'.encode('ascii'))
+            rylr.send(1, 'all presetdystopia'.encode('ascii'))
+            rylr.send(2, 'all presetdystopia'.encode('ascii'))
+            rylr.send(3, 'all presetdystopia'.encode('ascii'))
 
         case 'irl':
             print('GOT: IRL')
-            rylr.send(0, 'all presetirl'.encode('ascii'))
+            rylr.send(1, 'all presetirl'.encode('ascii'))
+            rylr.send(2, 'all presetirl'.encode('ascii'))
+            rylr.send(3, 'all presetirl'.encode('ascii'))
+            
+            
+            
 
 
 def fadein_handler(address, *args): #should get str:preset_name, int:fade_ms
