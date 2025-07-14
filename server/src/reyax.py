@@ -221,7 +221,8 @@ class RYLR998:
             raise Exception("Setting RF output power to " + str(value) + "' dBm failed with response " + str(response))
         
     def send(self, address:int, data:bytes) -> None:
-        """Send a packet of binary data to a specified address."""
+        """ARGS > address:int (address to send to), data:bytes (str should be encoded using .encode("ascii"))
+        Send a packet of binary data to a specified address."""
 
         # max length that can be sent in one go is 240
         if len(data) > 240:

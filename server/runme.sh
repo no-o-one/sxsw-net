@@ -23,8 +23,8 @@ pip install python-osc pyserial  #modules to install
 
 #run the Python application
 if [ -f "$APP_FILE" ]; then
-  echo "Running $APP_FILE..."
+  echo "> Running $APP_FILE..."
   python "$APP_FILE"
 else
-  echo "Python app file $APP_FILE not found!"
+  echo "!WARNING! Python app file $APP_FILE not found!"
 fi

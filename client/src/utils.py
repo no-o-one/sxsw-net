@@ -37,11 +37,12 @@ def jewel_test():
     jewel[5] = (0,0,0)
     jewel[6] = (0,0,0)
     jewel.write()
-    print('jewel test done')
+    print('> Jewel test done')
 
 
 
 def jewel_set_all(r, g, b):
+    """ARGS > r:int (0-255), g:int (0-255), b:int (0-255)"""
     global jewel
     for i in range(0, 7):
         jewel[i] = (r,g,b)
@@ -49,7 +50,9 @@ def jewel_set_all(r, g, b):
     
 
 
-def jewel_set(list_of_tups): #takes a list of tuples of rg values for each led
+def jewel_set(list_of_tups):
+    """ARGS > list_of_tups:list (each tuple contains r:int (0-255), g:int (0-255), b:int (0-255)
+    for the corresponding led on the jewel; list must be 7 items long because og this)"""
     for i in range(0,7):
         jewel[i] = list_of_tups[i]
     jewel.write()
@@ -100,7 +103,7 @@ def servo_test():
     print('motor test')
 
 
-
+#TODO: precentage impl. use 40 as a placeholder for now
 def servo_set_angle(angle):
     # Convert angle (0–180) to duty_u16 value (~1638 to 8192)
     min_duty = 1638  # 1ms pulse (5% of 20ms)
@@ -109,11 +112,11 @@ def servo_set_angle(angle):
     servo.duty_u16(duty)
 
 
-
-
+#TODO: precentage impl. use 40 as a placeholder for now
 def servo_rotate(to_angle, speed = 0.01):
+    """ARGS > to_angle:int, speed:int (optional wait time inbetween steps in seconds; 0.01 by default)"""
     global servo_last_angle
-    print('rotating form', servo_last_angle, 'to', to_angle)
+    print('> Rotating form', servo_last_angle, 'to', to_angle)
     if to_angle > servo_last_angle:
         for deg in range(servo_last_angle, to_angle):
             servo_set_angle(deg)
@@ -128,10 +131,11 @@ def servo_rotate(to_angle, speed = 0.01):
 
 
 def connection_setup(self_address):
+    """ARGS > self_adress:int (address can be 0 - 65535)"""
     try:
         uart = machine.UART(1, baudrate=115200, tx=machine.Pin(4), rx=machine.Pin(5))
         rylr = reyax.RYLR998(uart)
-        rylr.address = self_address #9999 id reserved for host, 9998 for center; format of xxyy where xx branch no, yy node no
+        rylr.address = self_address
         if not rylr.pulse:
             print('!WARNING! LoRa module test failed')
     except Exception as e:
@@ -139,9 +143,9 @@ def connection_setup(self_address):
         print(e)
         pass
 
-    print('Connected network id: ', rylr.networkid) #18 by default, i will leave it like that
-    print('Connected module address: ', rylr.address)
-    msg = "Module address #" + str(rylr.address) + " has connected to the network."
+    print('> Connected network id: ', rylr.networkid) #18 by default, i will leave it like that
+    print('> Connected module address: ', rylr.address)
+    msg = "> Module address #" + str(rylr.address) + " has connected to the network."
     rylr.send(9999, msg.encode("ascii"))
     return rylr
 
