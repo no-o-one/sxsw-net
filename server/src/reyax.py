@@ -8,12 +8,12 @@ Copyright 2024 Tim Hanewich
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-"""
 
-#import machine < here isnt needed since were on the server side; the serial is handled by pyserial thorughpyserialwrapper
+this file has been modified to work with python
+"""
 import time
 
-#emulating the micropythons functions
+#emulating micropythons functions
 def ticks_ms():
     return int(time.monotonic() * 1000)
 
@@ -294,14 +294,12 @@ class RYLR998:
 
         # send command
         self._uart.write(command)
-        sleep_ms(10) #allow te module to respond to avoid timeout
+        sleep_ms(5) #give the module time ot respond to avoid timeout
 
         # wait for a response, but also wait for an appropriate response (ignore + cache any received messages)
         started_waiting_at_ticks_ms:int = ticks_ms()
         response:bytes = None # will contain the actual response we will return back.
-        #print(f'!DEBUG! strarting timer at {started_waiting_at_ticks_ms}')
         while (ticks_ms() - started_waiting_at_ticks_ms) < response_timeout_ms and response == None:
-            #print(f'!DEBUG! looping at {ticks_ms()}')
             if self._uart.any() > 0: # if there are bytes to read
                 new_bytes = self._uart.read() # read the bytes
                 print(f'!DEBUG! got {new_bytes!r}')

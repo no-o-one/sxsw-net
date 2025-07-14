@@ -4,9 +4,8 @@ import src.pyserialwrapper as pyserialwrapper
 import src.reyax as reyax
 from src.Mesh import *
 import src.utils as utils
-import time
-import random
 import code
+import threading
 
 
 
@@ -100,10 +99,18 @@ dispatcher.map("/flowerlights/transient", transient_handler)
 
 server = BlockingOSCUDPServer((ip, port), dispatcher) #blocking server as in in blocks the main thread until program is aborted
 
-print("! SERVER STARTED ON " + ip + ":" + str(port) + "! Listening in progress...")
-server.serve_forever() # !!!blocks the main thread
 
-#TODO: implement starting server on adifferent threading to enable repl acess later to pin gte nodes for example and other debug
-#print("> Setup finished, opening REPL for debug...")
-# Start interactive shell
-#code.interact(local=locals())
+def start_server():
+    print("> !SERVER STARTED ON " + ip + ":" + str(port) + "! Listening in the background...")
+    server.serve_forever()
+
+# Start the server in a daemon thread
+server_thread = threading.Thread(target=start_server, daemon=True)
+server_thread.start()
+
+# Start interactive shell (REPL) in main thread
+print("> Setup finished, opening REPL for debug...")#exit() or ctrl+D to exit repl, the daemon thread will be killed automatically
+code.interact(local=locals())
+
+print("> REPL exited, killing all threads...")
+
