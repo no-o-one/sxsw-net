@@ -1,12 +1,14 @@
+import lightserver as lightserver
+
 def ping(id_to_ping):
     id_to_ping
 
-def pingall():
+def ping_all():
     pass
 
-def send_all_nodes(mesh, lora_module, msg:str):
-    for branch in mesh.mesh:
+def send_all(msg:str):
+    for branch in lightserver.thismesh.mesh:
         for node in branch:
             msg = f'{str(node)}  {msg}'
             print(f'sent to branch {branch}, node {node}, msg {msg}')
-            lora_module.send(node, msg.encode("ascii"))
+            lightserver.rylr.send(node, msg.encode("ascii"))

@@ -1,6 +1,7 @@
 class Mesh:
-
-    def __init__(self, mesh = [[]], has_center = False): # if has+center then center_id will always be 9998
+    #ids can be 0-65535
+    #65535 is reseved for the server's module
+    def __init__(self, mesh = [[]], has_center = False):
         self.mesh = mesh
         self.has_center = has_center
     

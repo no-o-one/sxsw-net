@@ -15,13 +15,16 @@ baudrate = 115200
 try:
     uart = pyserialwrapper.pyserialUARTwrapper(port, baudrate)
     rylr = reyax.RYLR998(uart)
+    rylr.address = 65535
     if not rylr.pulse:
         print('!WARNING! LoRa module test failed')
 except Exception as e:
     print(f'!WARNING! Connection to LoRa at {port} with baudrate {baudrate} failed with the following: \n{e}')
-#--
+
+
+
 #setup existing mesh of nodes
-thismesh = Mesh([[0, 1]])
+thismesh = Mesh([[1,2,3]])
 
 
 def print_osc(address, *args):
@@ -89,7 +92,7 @@ def transient_handler(address, *args): #should get int:duration_ms, ?:intensity,
 
 
 ip ="127.0.0.1" #localhost
-port = 8080 #qlab listens to this port for feedback by defualt
+port = 8080
 
 dispatcher = Dispatcher() #create disptcher for message routing 
 dispatcher.map("/flowerlights/preset", preset_handler) #map the OSC commands to handler functions 

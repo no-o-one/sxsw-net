@@ -14,8 +14,8 @@ import _thread
 
 
 lock = _thread.allocate_lock()    
-host_id = 9999
-self_id = 2 #0001
+host_id = 65535
+self_id = 2 
 led_builtin = machine.Pin(25, machine.Pin.OUT)
 utils.current_animation = 'off'
 
@@ -35,75 +35,76 @@ def test_all():
 
 
 
-def listen_to_host(): #also tracks current
+def listen_to_host(): 
     while 1:
         received_msg = rylr.receive()
         if not received_msg == None:
             print(received_msg)
             data_parsed = received_msg.data.decode("ascii").split()
-            #check if addressed to self
-            if data_parsed[0] == str(self_id) or data_parsed[0] == 'all':
-                #check received via imitating match-case for micropython does not have it :(
-                if data_parsed[1] == 'setallleds': #args > int:R, int:G, int:B
-                    utils.jewel_set_all(int(data_parsed[1]), int(data_parsed[2]), int(data_parsed[3]))
+            #check received via imitating match-case for micropython does not have it :(
+            if data_parsed[0] == 'setallleds': #args > int:R, int:G, int:B
+                utils.jewel_set_all(int(data_parsed[1]), int(data_parsed[2]), int(data_parsed[3]))
 
-                elif data_parsed[1] == 'presetoff':
-                    print('got off')
-                    lock.acquire()
-                    utils.current_animation = 'off'
-                    lock.release()
-                    utils.jewel_set_all(0,0,0)
-                    utils.servo_rotate(40)
-                    utils.jewel_set_all(0,0,0)
-                    utils.jewel_set_all(0,0,0)
+            elif data_parsed[0] == 'pyexec':
+                #TODO: make node execute whatever python follows
+                pass
+
+            elif data_parsed[0] == 'presetoff':
+                print('got off')
+                lock.acquire()
+                utils.current_animation = 'off'
+                lock.release()
+                utils.jewel_set_all(0,0,0)
+                utils.servo_rotate(40)
+                utils.jewel_set_all(0,0,0)
+                utils.jewel_set_all(0,0,0)
+            
+
+            elif data_parsed[0] == 'presettest':
+                print('got test')
+                lock.acquire()
+                utils.current_animation = 'test'
+                lock.release()
+            
+            elif data_parsed[0] == 'presetspotlight':
+                print('got spotlight')
+                lock.acquire()
+                utils.current_animation = 'spotlight'
+                lock.release()
+                utils.servo_rotate(40)
+                utils.jewel_set_all(0, 0, 0)
+                utils.jewel_set_all(90,90,90)
+                utils.servo_rotate(180)
+            
+            elif data_parsed[0] == 'presetnature':
+                print('got nature')
+                lock.acquire()
+                utils.current_animation = 'nature'
+                lock.release()
+                utils.servo_rotate(40)
+                utils.jewel_set_all(0, 0, 0)
+                utils.jewel_set_all(180,250,40)
+                utils.servo_rotate(180)
+            
+            elif data_parsed[0] == 'presetdystopia':
+                print('got dystopia')
+                lock.acquire()
+                utils.current_animation = 'dystopia'
+                lock.release()
+                utils.servo_rotate(40, 0.005)
+                utils.jewel_set_all(0, 0, 0)
+                utils.jewel_set_all(250,0,0)
                 
 
-                elif data_parsed[1] == 'presettest':
-                    print('got test')
-                    lock.acquire()
-                    utils.current_animation = 'test'
-                    lock.release()
-                
-                elif data_parsed[1] == 'presetspotlight':
-                    print('got spotlight')
-                    lock.acquire()
-                    utils.current_animation = 'spotlight'
-                    lock.release()
-                    utils.servo_rotate(40)
-                    utils.jewel_set_all(0, 0, 0)
-                    utils.jewel_set_all(90,90,90)
-                    utils.servo_rotate(180)
-                
-                elif data_parsed[1] == 'presetnature':
-                    print('got spotlight')
-                    lock.acquire()
-                    utils.current_animation = 'nature'
-                    lock.release()
-                    print('got nature')
-                    utils.servo_rotate(40)
-                    utils.jewel_set_all(0, 0, 0)
-                    utils.jewel_set_all(180,250,40)
-                    utils.servo_rotate(180)
-                
-                elif data_parsed[1] == 'presetdystopia':
-                    print('got spotlight')
-                    lock.acquire()
-                    utils.current_animation = 'dystopia'
-                    lock.release()
-                    utils.servo_rotate(40, 0.005)
-                    utils.jewel_set_all(0, 0, 0)
-                    utils.jewel_set_all(250,0,0)
-                    
-
-                elif data_parsed[1] == 'presetirl':
-                    print('got spotlight')
-                    lock.acquire()
-                    utils.current_animation = 'irl'
-                    lock.release()
-                    utils.servo_rotate(40)
-                    utils.jewel_set_all(0, 0, 0)
-                    utils.jewel_set_all(180,10,190)
-                    utils.servo_rotate(180)
+            elif data_parsed[0] == 'presetirl':
+                print('got irl')
+                lock.acquire()
+                utils.current_animation = 'irl'
+                lock.release()
+                utils.servo_rotate(40)
+                utils.jewel_set_all(0, 0, 0)
+                utils.jewel_set_all(180,10,190)
+                utils.servo_rotate(180)
                     
                 
         time.sleep(0.1)
