@@ -138,7 +138,6 @@ def listen_to_anim_state():
 
 
 
-
 print('> Setting up LoRa')
 rylr = utils.connection_setup(self_id)
 
@@ -147,11 +146,3 @@ utils.file_system_setup()
 
 print('> Starting the server thread')#only two per pico are possible
 _thread.start_new_thread(listen_to_host, ())#empty tuple is args
-
-# print('> Starting the animation tracking thread')
-# for i in range(0, 500): 
-#     listen_to_anim_state()
-#     time.sleep(0.1)
-    
-
-
