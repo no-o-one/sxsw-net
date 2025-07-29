@@ -1,23 +1,22 @@
 try:
     import src.reyax as reyax
 except:
-    print("!couldnt import reyax.py!")
-import os
-import time
-import neopixel
+    print("!couldnt import reyax.py from src!")
 try:
     import src.utils as utils
 except:
-    print("!couldnt import utils.py!")
-    import utils
+    print("!couldnt import utils.py from src; trying ot import from ./!")
+    import utils #type:ignore
 import _thread
+import uasyncio #type:ignore
+
 
 
 lock = _thread.allocate_lock()    
 host_id = 65535
-self_id = 2 
+self_id = 2 #placeholder
 led_builtin = machine.Pin(25, machine.Pin.OUT)
-utils.current_animation = 'off'
+utils.current_animation = 'off' #shared flag between all threads and utils.py
 
 
 def test_all():
@@ -35,31 +34,29 @@ def test_all():
 
 
 
-def listen_to_host(): 
+async def listen_to_host(): 
     while 1:
         received_msg = rylr.receive()
         if not received_msg == None:
             print(received_msg)
             data_parsed = received_msg.data.decode("ascii").split()
-            #check received via imitating match-case for micropython does not have it :(
+            #check received via imitating match-case; micropython does not have it :(
+
+            #if not an animation command, handle command
             if data_parsed[0] == 'setallleds': #args > int:R, int:G, int:B
                 utils.jewel_set_all(int(data_parsed[1]), int(data_parsed[2]), int(data_parsed[3]))
 
             elif data_parsed[0] == 'pyexec':
-                #TODO: make node execute whatever python follows
+                #TODO: make node execute whatever python follows [remote debugging]
                 pass
 
+            #if an anitmaiton command, change the current_animation flag to let the second core handle it
             elif data_parsed[0] == 'presetoff':
                 print('got off')
                 lock.acquire()
                 utils.current_animation = 'off'
-                lock.release()
-                utils.jewel_set_all(0,0,0)
-                utils.servo_rotate(40)
-                utils.jewel_set_all(0,0,0)
-                utils.jewel_set_all(0,0,0)
+                lock.release()     
             
-
             elif data_parsed[0] == 'presettest':
                 print('got test')
                 lock.acquire()
@@ -70,72 +67,54 @@ def listen_to_host():
                 print('got spotlight')
                 lock.acquire()
                 utils.current_animation = 'spotlight'
-                lock.release()
-                utils.servo_rotate(40)
-                utils.jewel_set_all(0, 0, 0)
-                utils.jewel_set_all(90,90,90)
-                utils.servo_rotate(180)
+                lock.release()     
             
             elif data_parsed[0] == 'presetnature':
                 print('got nature')
                 lock.acquire()
                 utils.current_animation = 'nature'
                 lock.release()
-                utils.servo_rotate(40)
-                utils.jewel_set_all(0, 0, 0)
-                utils.jewel_set_all(180,250,40)
-                utils.servo_rotate(180)
-            
+                
             elif data_parsed[0] == 'presetdystopia':
                 print('got dystopia')
                 lock.acquire()
                 utils.current_animation = 'dystopia'
                 lock.release()
-                utils.servo_rotate(40, 0.005)
-                utils.jewel_set_all(0, 0, 0)
-                utils.jewel_set_all(250,0,0)
                 
-
             elif data_parsed[0] == 'presetirl':
                 print('got irl')
                 lock.acquire()
                 utils.current_animation = 'irl'
                 lock.release()
-                utils.servo_rotate(40)
-                utils.jewel_set_all(0, 0, 0)
-                utils.jewel_set_all(180,10,190)
-                utils.servo_rotate(180)
-                    
-                
-        time.sleep(0.1)
+                 
+    await uasyncio.sleep(0.2)
 
 
-def listen_to_anim_state():
+def handle_animations(): #this is the second core functionality
     lock.acquire()
-    current_anim = utils.current_animation 
+    cur_anim = utils.current_animation
     lock.release()
 
-    if current_anim == 'off':
+    if cur_anim == 'off':
         utils.jewel_set_all(0, 0, 0)
         utils.servo_rotate(40)
 
-    elif current_anim == 'test':
+    elif cur_anim  == 'test':
         utils.render_test_animation()
 
-    elif current_anim == 'spotlight':
+    elif cur_anim  == 'spotlight':
        utils.render_test_animation()
 
-    elif current_anim == 'nature':
+    elif cur_anim  == 'nature':
        utils.render_nature_animation()
 
-    elif current_anim == 'irl':
+    elif cur_anim  == 'irl':
        utils.render_irl_animation()
 
-    elif current_anim == 'dystopia':
+    elif cur_anim  == 'dystopia':
        utils.render_dystopia_animation()
 
-    time.sleep(0.1)
-
+    
 
 
 print('> Setting up LoRa')
@@ -144,5 +123,12 @@ rylr = utils.connection_setup(self_id)
 print("> Setting up the file system")
 utils.file_system_setup()
 
-print('> Starting the server thread')#only two per pico are possible
-_thread.start_new_thread(listen_to_host, ())#empty tuple is args
+
+print("> Starting server listening")
+current_loop = uasyncio.get_event_loop()    # get or create the event loop
+current_loop.create_task(listen_to_host())  # schedule the coroutine
+current_loop.run_forever()                  # start the loop (won't return unless stopped)
+
+
+print('> Starting the second thread (animation handling)')#only two per pico are possible
+_thread.start_new_thread(handle_animations, ())#empty tuple is args

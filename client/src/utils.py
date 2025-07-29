@@ -12,9 +12,9 @@ import time
 
 servo = machine.PWM(machine.Pin(17))
 servo.freq(50)  # 50Hz for servo control
-jewel = neopixel.NeoPixel(machine.Pin(16, machine.Pin.OUT), 7) #7 is num of leds
+jewel = neopixel.NeoPixel(machine.Pin(16, machine.Pin.OUT), 7) #7 is num of LEDs
 servo_last_angle = 180
-current_animation = 'off' #track the current animation so that it can be broken out of
+current_animation = 'off' #shared flag between two cores and boot.py
 
 
 def jewel_test():
@@ -150,7 +150,7 @@ def connection_setup(self_address):
     return rylr
 
 
-#ANIMATION RENDERERS--- will also have to actively check the current_animation because threading is a headache
+#ANIMATION RENDERERS--- will also have to actively check the current_animation because threading is a  - this is terrifying please whta the fuck
 def render_test_animation(speed=0.001):
     global current_animation
     for intensity in range(0, 256):
