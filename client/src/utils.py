@@ -9,12 +9,13 @@ except:
 import os
 import random
 import time
+import uasyncio
 
 servo = machine.PWM(machine.Pin(17))
 servo.freq(50)  # 50Hz for servo control
 jewel = neopixel.NeoPixel(machine.Pin(16, machine.Pin.OUT), 7) #7 is num of LEDs
 servo_last_angle = 180
-current_animation = 'off' #shared flag between two cores and boot.py
+current_animation = 'none' #shared flag between two cores and boot.py
 
 
 def jewel_test():
@@ -298,18 +299,48 @@ def render_nature_animation():
 
 
 
-def render_irl_animation():
+async def render_irl_animation(lock):#uasyncio.sleep(0) are sprinkled in here to make sure other functions in boot.py still run
     global current_animation
-    jewel_set_all(103,80,250)
-    if not current_animation == 'irl':
-        pass
-    servo_rotate(180, 0.02)
-    if not current_animation == 'irl':
-        pass
+    
+    #light up softly white
+    for i in range(0, 10):
+        jewel_set_all(i, i, i)
+        await uasyncio.sleep(0.05)
 
-    jewel_set_all(80,90,250)
-    if not current_animation == 'irl':
-        pass
-    servo_rotate(140, 0.02)
-    if not current_animation == 'irl':
-        pass
+    #open
+    servo_rotate(40)
+    await uasyncio.sleep(0)
+    servo_rotate(70, 0.008)
+    await uasyncio.sleep(0)
+    servo_rotate(110, 0.012)
+    await uasyncio.sleep(0)
+    servo_rotate(160, 0.018)
+    await uasyncio.sleep(0)
+    servo_rotate(180, 0.026)
+    await uasyncio.sleep(0)
+
+    #fade to purple 90, 10, 130
+    for i in range(10, 130):
+        if i < 90:
+            jewel_set_all(i, 10, i)
+        else:
+           jewel_set_all(90, 10, i) 
+        await uasyncio.sleep(0.05)
+    
+    #chill
+    await uasyncio.sleep(5)
+
+    #close
+    servo_rotate(160, 0.026)
+    await uasyncio.sleep(0)
+    servo_rotate(110, 0.018)
+    await uasyncio.sleep(0)
+    servo_rotate(70, 0.012)
+    await uasyncio.sleep(0)
+    servo_rotate(40, 0.008)
+    await uasyncio.sleep(0)
+   
+    #reset animation done, reset the tracker in a safe fashion so that the animation can re trigger if needed
+    lock.acquire()
+    current_animation = 'none'
+    lock.release()
