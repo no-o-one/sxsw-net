@@ -10,7 +10,7 @@ import threading
 
 
 #LORA MODULE SETUP
-port = '/dev/tty.usbserial-16'
+port = '/dev/tty.usbserial-XX' #placeholder
 baudrate = 115200
 try:
     uart = pyserialwrapper.pyserialUARTwrapper(port, baudrate)

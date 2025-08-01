@@ -1,13 +1,14 @@
 import time
 
 def ping(id_to_ping):
-    id_to_ping
+    pass
 
 def ping_all():
     pass
 
-def send_all(mesh, module, msg:str, delay_branch=0, delay_node=0):
-    """ARGS > mesh:Mesh, module:RYLR998, delay_branch:int(optional), delay_node:int(optional)"""
+#send to all nodes with delay for animations, to sent to all insantaniously send to id 0
+def send_all(mesh, module, msg:str, delay_node=0, delay_branch=0):
+    """ARGS > mesh:Mesh, module:RYLR998, delay_node:int(optional), delay_branch:int(optional)"""
     for branch in mesh.mesh:
         for node in branch:
             print(f'sent to branch {branch}, node {node}, msg {msg}')

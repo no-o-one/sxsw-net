@@ -1,4 +1,6 @@
 #!/bin/bash
+#TODO: make this script solve the changing port issue somehow
+
 
 #exit on error
 set -e

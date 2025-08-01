@@ -1,5 +1,3 @@
-#this is a wrapper class to make the RYLR998 driver compatible with the pyserial mudule
-#it is neede due to the fact that the driver uses machine.UART module instead which is not available on python
 import serial
 
 class pyserialUARTwrapper:
