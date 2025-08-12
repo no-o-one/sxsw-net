@@ -1,14 +1,18 @@
+#for detailed breakdown, see https://www.youtube.com/watch?v=eEBUl07-ub4
+
 import machine
 import rp2
 from rp2 import StateMachine
 import time
 
-rp2.PIO(0).remove_program()
+rp2.PIO(0).remove_program() #here we will make it so the programmable memory of the state machine is getting
+#cleared out on every restart, as it is not done so automatically which leads to running out of memory
 
+#this pio will run continiously, holding the signal based on what ends up being pulled into the ISR
 @rp2.asm_pio(set_init=rp2.PIO.OUT_LOW, out_shiftdir=rp2.PIO.SHIFT_RIGHT)
 def servo_set_pio():
     #set values to scratch registers then move in to the ISR 5 bits at a time (the max amount of bits mov can operate on)
-    #this is the pulse width value - the one that will be controlling the servo angle, here it is 1500 ms, so 90 deg
+    #this is the pulse width value - the one that will be controlling the servo angle, here it is 1500, so 90 deg
     set(x, 0b10111)
     in_(x, 5)
     set(x, 0b01110)
@@ -23,7 +27,7 @@ def servo_set_pio():
     set(y, 0b10001)
     in_(y, 5)
     set(y, 0b00000)
-    in_(y, 5) #value in ISR now 100111000100000 bin - 2000 dec - the servos period
+    in_(y, 5) #value in ISR now 100111000100000 bin - 20000 dec - the servos period
     
     wrap_target()
     #update scratch registers
@@ -35,14 +39,33 @@ def servo_set_pio():
     jmp(x_not_y, 'todecjump')#if x!= y jump to decrementing jump, if not continiue execution
     set(pins, 1) #start high signal
     label('todecjump')
-    jmp(y_dec,'periodloop')#decrement y (pulse period) and restart the loop, as y is 2000 it will execute counting loop 2000 time giving the full period before wrapping
+    jmp(y_dec,'periodloop')#decrement y (pulse period) and restart the loop, as y is 2000
+    #it will execute counting loop 2000 time giving the full period before wrapping
     
     wrap()
 
 
 sm0 = rp2.StateMachine(0, servo_set_pio, freq=2000000, set_base=machine.Pin(17))
-#reference the period loop of the PIO programm. there are two instructions (except for the singular loop where x = y, tehre are 3 there but we will
-#ignore it and assume it to be within the margin of error) being executed per loop, those being the jump statements, thus in order for 1 iteration to
-#take 1ms we will have to have 1 instruction take 0.5ms, so we will be setting the frequency for the state machine at 2000000
+#reference the period loop of the PIO programm. there are two instructions (except for the
+#singular loop where x = y, tehre are 3 there but we will ignore it and assume it to be within
+#the margin of error) being executed per loop, those being the jump statements, thus in order
+#for 1 iteration to take 1ms we will have to have 1 instruction take 0.5ms, so we will be 
+#setting the frequency for the state machine at 2000000
 sm0.active(1)
 #servo now should rotate to 90
+
+time.sleep(2)
+
+sm0.put(2500) #put 2000 in FIFO tx register - this will not turn the servo as the pio is generating
+#pwm based on what is in the ISR - so whatever is in the tx fifo needs to first be pulled into isr
+
+#this will be done with the following - making python execute a state machine assembly pull command
+#what is nice about it is that it will execute it no matter which part of the loop the pio is in
+#and also will not interefere with the timining like it would have if weve done it within pio
+sm0.exec("pull()")#the servo now shoul rotate to 180
+
+time.sleep(2)
+
+sm0.put(500)
+sm0.exec("pull()")#the servo should rotate to 0
+
