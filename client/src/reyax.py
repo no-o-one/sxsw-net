@@ -9,7 +9,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-this file has been modified only in comments
+this file has been modified in comments and has had connection_setup added to it
 """
 
 import machine
@@ -310,5 +310,23 @@ class RYLR998:
         return response
 
 
+#function added for simplicity in boot
+def connection_setup(self_address):
+    """ARGS > self_adress:int (address can be 1 - 65535)"""
+    try:
+        uart = machine.UART(1, baudrate=115200, tx=machine.Pin(4), rx=machine.Pin(5))
+        rylr = RYLR998(uart)
+        rylr.address = self_address
+        if not rylr.pulse:
+            print('!WARNING! LoRa module test failed')
+    except Exception as e:
+        print("!WARNING! Failed to set up the LoRa module with the following exception:")
+        print(e)
+        pass
 
+    print('> Connected network id: ', rylr.networkid) #18 by default, i will leave it like that
+    print('> Connected module address: ', rylr.address)
+    msg = "> Module address #" + str(rylr.address) + " has connected to the network."
+    rylr.send(9999, msg.encode("ascii"))
+    return rylr
 

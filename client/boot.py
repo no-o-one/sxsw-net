@@ -6,8 +6,18 @@ except:
 try:
     import src.utils as utils
 except:
-    print("!couldnt import utils.py from src; trying ot import from ./!")
+    print("!couldnt import utils.py from src!")
     import utils #type:ignore
+try:
+    import src.jewelutils as jewelutils
+except:
+    print("!couldnt import jewelutils.py from src!")
+
+try:
+    import src.servoutils as servoutils
+except:
+    print("!couldnt import servoutils.py from src!")
+
 import _thread
 import uasyncio #type:ignore
 import time
@@ -20,20 +30,6 @@ host_id = 65535
 self_id = 1 #placeholder
 led_builtin = machine.Pin(25, machine.Pin.OUT)
 utils.current_animation = 'none' #shared flag between all threads and utils.py
-
-
-def test_all():
-    rylr.send(host_id, "testing motors!".encode("ascii"))
-    print("testing motors!")
-    utils.servo_test()
-    rylr.send(host_id, "testing jewel!".encode("ascii"))
-    print("testing jewel!")
-    utils.jewel_test()
-    rylr.send(host_id, "done!".encode("ascii"))
-    print("done!")
-    rylr.send(host_id, "setting servo to 0".encode("ascii"))
-    print("setting servo to 0")
-    utils.servo_set_angle(0)   
 
 
 
@@ -50,9 +46,11 @@ def listen_to_host(): #this is the second core functionality
                 utils.jewel_set_all(int(data_parsed[1]), int(data_parsed[2]), int(data_parsed[3]))
 
             elif data_parsed[0] == 'pyexec':
-                #TODO: make node execute whatever python follows (part of remote debugging)
-                #TODO: because animations (and interfacing with the ahrdware actually) are handled by core 0, consider race conditions (help)
-                pass
+                command = received_msg.data.decode("ascii")[7:]
+                try:
+                    exec(command)
+                except Exception as e:
+                    print(e)
 
             elif data_parsed[0] == 'nuke':#failsafe/remote debugging - deletes boot py in case it blocks serial/fails something else
                 print('got nuke, dleteing boot and restetting machine...')
@@ -95,8 +93,7 @@ def listen_to_host(): #this is the second core functionality
                 lock.acquire()
                 utils.current_animation = 'irl'
                 lock.release()
-                 
-    time.sleep(0.2)
+        time.sleep(0.2)
 
 
 async def animaiton_listener(lock): #async handles this loop in order to make it non blocking, and therefore permit acess to repl
@@ -136,14 +133,15 @@ async def animaiton_listener(lock): #async handles this loop in order to make it
 
 
 print('> Setting up LoRa')
-rylr = utils.connection_setup(self_id)
+rylr = reyax.connection_setup(self_id)
 print("> Setting up the file system")
 utils.file_system_setup()
 
 print('> Starting the second thread  for server')#only two per pico are possible
 _thread.start_new_thread(listen_to_host, ())#empty tuple is args
 
-print("> Starting animation processing async")
-current_loop = uasyncio.get_event_loop()    #get or create the event loop
+#REPL GRACE PERIOD HERE
+
+
 #current_loop.create_task(animaiton_listener(lock))  #schedule the coroutine
 #current_loop.run_forever()                  # start the loop (won't return unless stopped, ctrl+C to interrupt)
