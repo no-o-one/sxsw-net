@@ -57,9 +57,9 @@ sm0 = rp2.StateMachine(0, servo_set_pio, freq=2000000, set_base=machine.Pin(17))
 sm0.active(1)
 #servo now should rotate to 90
 
-time.sleep(2)
+time.sleep(1)
 
-sm0.put(2500) #put 2000 in FIFO tx register - this will not turn the servo as the pio is generating
+sm0.put(2500) #put 2500 in FIFO tx register - this will not turn the servo as the pio is generating
 #pwm based on what is in the ISR - so whatever is in the tx fifo needs to first be pulled into isr
 
 #this will be done with the following - making python execute a state machine assembly pull command
@@ -67,33 +67,32 @@ sm0.put(2500) #put 2000 in FIFO tx register - this will not turn the servo as th
 #and also will not interefere with the timining like it would have if weve done it within pio
 sm0.exec("pull()")#the servo now shoul rotate to 180
 
-time.sleep(2)
 
-sm0.put(500)
-sm0.exec("pull()")#the servo should rotate to 0
-print(0)
-time.sleep(2)
-counter = 500
+def set_angle_servo(angle): #fun fact when you set it to 190 it starts spinning continiuously with a 360 range
+    t_st = time.ticks_cpu()
+    
+    angle = 500+int(angle*11.11)#convert angle to 500-2500 range
+    sm0.put(angle)
+    t_p = time.ticks_cpu()
+    sm0.exec("pull()") #this is taking too long TODO: fix in some way 
+    
+    t_e = time.ticks_cpu()
+    print(f'it took {str(t_p-t_st)} cpu clock cycles at ~200mHz being approx {str(((t_p-t_st)/200000)*1000000)} nanoseconds to put the agnle in the FIFO')
+    print(f'''it took {str(t_e-t_st)} cpu clock cycles at ~200mHz being approx {str(((t_e-t_st)/200000)*1000000)} nanoseconds
+    to preform the whole adressign including telling the state machine to execute pull()''')
 
-timer_servo = machine.Timer()#an easy out is to use a timer, it is already async
 
-def timer_callback(timer):
-    global counter
-    if counter < 2499:
-        sm0.put(counter)
-        sm0.exec("pull()")
-        counter += 20
-
+# counter = 500
+# timer_servo = machine.Timer()#an easy out is to use a timer, it is already async
+# def timer_callback(timer):
+#     global counter
+#     if counter < 2499:
+#         sm0.put(counter)
+#         sm0.exec("pull()")
+#         counter += 20
 #i will set the period here to 30 jsut to make sure the pwm has time to finish fully
-timer_servo.init(period=30, mode=machine.Timer.PERIODIC, callback=timer_callback)
-
-opnum=0
-for i in range(0, 20):
-    print(f'main loop op num {opnum}')
-    opnum+=1
-    time.sleep(0.5)
-
-timer_servo.deinit()
+# timer_servo.init(period=30, mode=machine.Timer.PERIODIC, callback=timer_callback)
+# timer_servo.deinit()
 
 
 
@@ -119,7 +118,7 @@ def jewel_set_pio(): #one instruction here will cost 1 clock cycle btw
     #duration of the high
     nop()     .side(1)[4]#set to high for one clock cycle and prolong for another 4 to get the full 6 high
     #cycles for a logic 1 together with the one on line 83
-    nop()    .side(0)[2]#set the rest of the 10 cycle period to low (account for the low on the next line)
+    nop()    .side(0)[3]#set the rest of the 10 cycle period to low (account for the low on the next line)
     jmp("process_bit")   .side(0)
     label("is_zero_bit")#process in case it is a logic 0 bit is the same as for the logic 1, but different lengths
     nop()     .side(1)[1]
@@ -130,8 +129,13 @@ sm4 = rp2.StateMachine(4, jewel_set_pio, freq=8000000, sideset_base=machine.Pin(
 #the machines are on different blocks and do not share one block's 32 word memory
 sm4.active(1)
 
-def set_all_pixels(colors): 
+def set_all_pixels(colors):
+    t_st = time.ticks_cpu()
+    colors.insert(0, [0,0,0])#TODO: i dont know why but there is an offset of 1 list item eg it is as if there is an
+    #additional led that is taking off the first 24 bits of the train for some reason 
     for color in colors:
         grb=color[1]<<16 | color[0]<<8 | color[2]#neopixels expect green FIRST then red then blue
         sm4.put(grb, 8) #this is a problem - there are 24 writes here stacked
-
+    t_e = time.ticks_cpu()
+    print(f'it took {str(t_e-t_st)} cpu clock cycles at ~200mHz being approx {str(((t_e-t_st)/200000)*1000000)} nanoseconds to set all of the leds')
+ 
