@@ -1,4 +1,6 @@
 class Mesh:
+    #TODO: implement @property and checks
+
     #ids can be 0-65535
     #65535 is reseved for the server's module
     def __init__(self, mesh = [[]], has_center = False):

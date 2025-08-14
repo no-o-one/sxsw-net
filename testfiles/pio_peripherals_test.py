@@ -13,15 +13,9 @@ rp2.PIO(0).remove_program() #here we will make it so the programmable memory of 
 #SERVO ASSEMBLY - as a result of testing, the prevoius method of contorllign hte servo was ebtter timingwise
 #taking 1~ 200 ns (uncomment to test) while, because of sm0.exec("pull()") the pio way takes ~46000
 
-# rp2.PIO(0).remove_program() #here we will make it so the programmable memory of the state machine is getting
-# rp2.PIO(1).remove_program()
-
 # servo = machine.PWM(machine.Pin(17))
 # servo.freq(50)  # 50Hz for servo control
 # servo_last_angle = 180
-
-
-
 
 # def servo_set_angle(angle):
 #     t_st = time.ticks_cpu()
@@ -158,7 +152,7 @@ def set_all_pixels(colors):
     #additional led that is taking off the first 24 bits of the train for some reason 
     for color in colors:
         grb=color[1]<<16 | color[0]<<8 | color[2]#neopixels expect green FIRST then red then blue
-        sm4.put(grb, 8) #this is a problem - there are 24 writes here stacked
+        sm4.put(grb, 8) 
     t_e = time.ticks_cpu()
     print(f'it took {str(t_e-t_st)} cpu clock cycles at ~200mHz being approx {str(((t_e-t_st)/200000)*1000000)} nanoseconds to set all of the leds')
  
