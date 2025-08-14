@@ -7,10 +7,33 @@ from rp2 import StateMachine
 import time
 
 rp2.PIO(0).remove_program() #here we will make it so the programmable memory of the state machine is getting
-#rp2.PIO(4).remove_program()
+#rp2.PIO(1).remove_program()
 #cleared out on every restart, as it is not done so automatically which leads to running out of memory
 
-#SERVO ASSEMBLY
+#SERVO ASSEMBLY - as a result of testing, the prevoius method of contorllign hte servo was ebtter timingwise
+#taking 1~ 200 ns (uncomment to test) while, because of sm0.exec("pull()") the pio way takes ~46000
+
+# rp2.PIO(0).remove_program() #here we will make it so the programmable memory of the state machine is getting
+# rp2.PIO(1).remove_program()
+
+# servo = machine.PWM(machine.Pin(17))
+# servo.freq(50)  # 50Hz for servo control
+# servo_last_angle = 180
+
+
+
+
+# def servo_set_angle(angle):
+#     t_st = time.ticks_cpu()
+#     # Convert angle (0–180) to duty_u16 value (~1638 to 8192)
+#     min_duty = 1638  # 1ms pulse (5% of 20ms)
+#     max_duty = 8192  # 2ms pulse (10% of 20ms)
+#     duty = int(min_duty + (angle / 180) * (max_duty - min_duty))
+#     servo.duty_u16(duty)
+    
+#     t_e = time.ticks_cpu()
+#     print(f'it took {str(t_e-t_st)} cpu clock cycles at ~200mHz being approx {str(((t_e-t_st)/200000)*1000000)} nanoseconds to set serbvo angle')
+
 #this pio will run continiously, holding the signal based on what ends up being pulled into the ISR
 @rp2.asm_pio(set_init=rp2.PIO.OUT_LOW, out_shiftdir=rp2.PIO.SHIFT_RIGHT)
 def servo_set_pio():
