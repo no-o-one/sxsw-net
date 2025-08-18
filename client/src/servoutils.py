@@ -8,7 +8,6 @@ class Servo():
         self.pwm_pin.freq(50) # 50Hz for servo control
         self.last_angle = last_angle
 
-    #TODO: percentage impl. use 40 as a placeholder for now
     def set_angle(self, angle):
         # Convert angle (0–180) to duty_u16 value (~1638 to 8192)
         min_duty = 1638  # 1ms pulse (5% of 20ms)

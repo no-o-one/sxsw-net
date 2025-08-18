@@ -1,8 +1,51 @@
 import os
 
 
-current_animation = 'none' #shared flag between two cores and boot.py
+class AnimationInstance():
+    def __init__(self, id, curve, seconds, fps, end_keyframe):#length in seconds and refresh rate in ms
+        self.id = id
+        self.curve = curve
+        self.seconds = seconds
+        self.fps = fps
+        self.total_frames = self.seconds*self.fps
+        self.ms_between_frames = int(1000/(self.fps))
+        self.end_keyframe = end_keyframe
+    
+    def compute(self, at_frame):
+        # Normalize time to 0.0 - 1.0
+        t = at_frame/ self.total_frames
 
+        # Apply chosen easing
+        if self.curve == 'cubic_in':
+            eased = t ** 3
+        elif self.curve == 'cubic_out':
+            eased = 1 - (1 - t) ** 3
+        elif self.curve == 'linear':
+            eased = t
+        elif self.curve == 'cubic_in_out':
+            if t < 0.5:
+                eased = 4 * t ** 3
+            else:
+                eased = 1 - ((-2 * t + 2) ** 3) / 2
+        elif self.curve == 'bounce':
+            if t < 1 / 2.75:
+                eased = 7.5625 * t * t
+            elif t < 2 / 2.75:
+                t -= 1.5 / 2.75
+                eased = 7.5625 * t * t + 0.75
+            elif t < 2.5 / 2.75:
+                t -= 2.25 / 2.75
+                eased = 7.5625 * t * t + 0.9375
+            else:
+                t -= 2.625 / 2.75
+                eased = 7.5625 * t * t + 0.984375
+
+        return eased * self.end_keyframe
+        
+
+
+
+current_animation = 'none' #shared flag between two cores and boot.py
 
 def file_system_setup():
     filestofind = ['boot.py', 'reyax.py', 'utils.py', 'jewelutils.py', 'servoutils.py']
