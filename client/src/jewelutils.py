@@ -34,16 +34,18 @@ class Neopixel():
         self.sm.active(1)
         self.pixels_amount = pixels_amount
 
-    def set_pixels(self, colors_list):
-        colors_list.insert(0, [0,0,0])#TODO: i dont know why but there is an offset of 1 list item eg it is as if there is an
+    def set(self, color):
+        if isinstance(color, int):
+            color = [color]*3
+        if isinstance(color[0], int):
+            color = [color]*self.pixels_amount   
+        #color.insert(0, [0,0,0])#TODO: i dont know why but there is ?only sometimes? an offset of 1 list item eg it is as if there is an
         #additional led that is taking off the first 24 bits of the train for some reason 
-        for color in colors_list:
-            grb=color[1]<<16 | color[0]<<8 | color[2]
+        for c in color:
+            grb=c[1]<<16 | c[0]<<8 | c[2]
             self.sm.put(grb, 8)
     
-    def set_all_pixels(self, color):
-        l = [color]*self.pixels_amount
-        self.set_pixels(l)
         
  
  
+
