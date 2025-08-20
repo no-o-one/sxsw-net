@@ -16,29 +16,3 @@ class Servo():
         self.pwm_pin.duty_u16(duty)
 
 
-
-# def servo_test():    
-#     for angle in range(0, 181, 30):
-#         servo_set_angle(angle)
-#         time.sleep(0.1)
-#     for angle in range(180, -1, -30):
-#         servo_set_angle(angle)
-#         time.sleep(0.1)
-#     print('motor test')
-
-
-# #TODO: percentage impl. use 40 as a placeholder for now
-# def servo_rotate(to_angle, speed = 0.01):
-#     """ARGS > to_angle:int, speed:int (optional wait time between steps in seconds; 0.01 by default)"""
-#     global servo_last_angle
-#     print('> Rotating form', servo_last_angle, 'to', to_angle)
-#     if to_angle > servo_last_angle:
-#         for deg in range(servo_last_angle, to_angle):
-#             servo_set_angle(deg)
-#             time.sleep(speed)
-#     else:
-#         for deg in range(servo_last_angle, to_angle, -1):
-#             servo_set_angle(deg)
-#             time.sleep(speed)
-#     servo_last_angle = to_angle
-#     print('rotated')

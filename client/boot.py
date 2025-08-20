@@ -9,18 +9,14 @@ except:
     print("!couldnt import utils.py from src!")
     import utils #type:ignore
 try:
-    import src.jewelutils as jewelutils
+    from src.animations import *
 except:
-    print("!couldnt import jewelutils.py from src!")
-try:
-    import src.servoutils as servoutils
-except:
-    print("!couldnt import servoutils.py from src!")
+    print("!couldnt import animations.py from src!")
 
 import _thread
-import uasyncio #type:ignore
 import time
 import os
+from sys import print_exception
 
 
 print('> Setting up system')
@@ -29,14 +25,10 @@ host_id = 65535
 self_id = 1 #placeholder
 led_builtin = machine.Pin(25, machine.Pin.OUT)
 
-utils.current_animation_flag_flag = 'none' #shared flags between all threads and utils.py
-utils.last_animation_flag = 'none'
-
-this_servo = servoutils.Servo()
-this_jewel = jewelutils.Neopixel()
+animationutils.current_animation_flag = 'none' #shared flags between all threads and utils.py
+animationutils.last_animation_flag = 'none'
 
 
-nature_animation_sequence = []
 
 
 
@@ -49,10 +41,7 @@ def listen_to_host(): #this is the second core functionality
             #check received via imitating match-case; micropython does not have it :(
 
             #if not an animation command, handle command
-            if data_parsed[0] == 'setallleds': #args > int:R, int:G, int:B
-                utils.jewel_set_all(int(data_parsed[1]), int(data_parsed[2]), int(data_parsed[3]))
-
-            elif data_parsed[0] == 'pyexec':
+            if data_parsed[0] == 'pyexec':
                 command = received_msg.data.decode("ascii")[7:]
                 try:
                     exec(command)
@@ -67,32 +56,32 @@ def listen_to_host(): #this is the second core functionality
             #if an anitmaiton command, change the current_animation flag
             elif data_parsed[0] == 'presetoff':
                 lock.acquire()
-                utils.current_animation_flag = 'off'
+                animationutils.current_animation_flag = 'off'
                 lock.release()     
             
             elif data_parsed[0] == 'presettest':
                 lock.acquire()
-                utils.current_animation_flag = 'test'
+                animationutils.current_animation_flag = 'test'
                 lock.release()
             
             elif data_parsed[0] == 'presetspotlight':
                 lock.acquire()
-                utils.current_animation_flag = 'spotlight'
+                animationutils.current_animation_flag = 'spotlight'
                 lock.release()     
             
             elif data_parsed[0] == 'presetnature':
                 lock.acquire()
-                utils.current_animation_flag = 'nature'
+                animationutils.current_animation_flag = 'nature'
                 lock.release()
                 
             elif data_parsed[0] == 'presetdystopia':
                 lock.acquire()
-                utils.current_animation_flag = 'dystopia'
+                animationutils.current_animation_flag = 'dystopia'   
                 lock.release()
                 
             elif data_parsed[0] == 'presetirl':
                 lock.acquire()
-                utils.current_animation_flag = 'irl'
+                animationutils.current_animation_flag = 'irl' 
                 lock.release()
         time.sleep_ms(1)
 
@@ -105,25 +94,36 @@ utils.file_system_setup()
 print('> Starting the second thread  for server....')#only two per pico are possible
 _thread.start_new_thread(listen_to_host, ())#empty tuple is args
 
-nature_anim = utils.AnimationInstance(this_servo, 'bounce', 2, 50, 180)
-
-#TODO: REPL GRACE PERIOD HERE
-
-while True: #start acrtivetly trackign animations
-    lock.acquire()
-    cur_anim_local = utils.current_animation_flag
-    lock.release()
+#TODO: REPL GRACE PERIOD HERE  
+while True: #start actively tracking animations
+    try:
+        lock.acquire() 
+        cur_anim_local = animationutils.current_animation_flag  
+        lock.release() 
+        if animationutils.last_animation_flag != cur_anim_local:   
+            if animationutils.last_animation_flag != 'none':
+                animationutils.AnimationInstance.kill_all() 
+            if cur_anim_local == 'nature':
+                nature_animation.reset()
+                nature_animation.play() 
+            elif cur_anim_local == 'off':
+                this_servo.set(0)
+                this_jewel.set(0)
+            elif cur_anim_local == 'irl':
+                irl_animation.reset()
+                irl_animation.play()
+            elif cur_anim_local == 'dystopia':
+                irl_animation.reset()
+                irl_animation.play()
+                nature_animation.reset()
+                nature_animation.play() 
     
-    if utils.last_animation_flag != cur_anim_local:
-        if utils.last_animation_flag != 'none':
-            utils.AnimationInstance.cease_all()
-        if cur_anim_local == 'nature':
-            nature_anim.play()
-        elif cur_anim_local == 'off':
-            this_servo.set(0)
-    
-    utils.last_animation_flag = cur_anim_local
-    time.sleep_ms(1)
+        animationutils.last_animation_flag = cur_anim_local  
+        time.sleep_ms(1)
+    except Exception as e:
+        print_exception(e)
+        break
+
 
 
 
