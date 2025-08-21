@@ -121,7 +121,6 @@ class AnimationController():
         self.__class__._instances.append(self)
 
 
-
     @property
     def sequence(self):
         return self._sequence

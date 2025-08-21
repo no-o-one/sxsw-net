@@ -1,30 +1,9 @@
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import BlockingOSCUDPServer
-import src.pyserialwrapper as pyserialwrapper
-import src.reyax as reyax
-from src.Mesh import *
 import src.utils as utils
 import code
 import threading
 
-
-
-#LORA MODULE SETUP
-port = '/dev/tty.usbserial-XX' #placeholder
-baudrate = 115200
-try:
-    uart = pyserialwrapper.pyserialUARTwrapper(port, baudrate)
-    rylr = reyax.RYLR998(uart)
-    rylr.address = 65535
-    if not rylr.pulse:
-        print('!WARNING! LoRa module test failed')
-except Exception as e:
-    print(f'!WARNING! Connection to LoRa at {port} with baudrate {baudrate} failed with the following: \n{e}')
-
-
-
-#setup existing mesh of nodes
-thismesh = Mesh([[1,2,3]])
 
 
 def print_osc(address, *args):
@@ -34,52 +13,40 @@ def print_osc(address, *args):
     print("\n")
 
 
-
 #MESSAGE HANDLERS
 #adress passes the OSC command that triggered the handler, *args is then an undefined sized tuple
 def preset_handler(address, *args): #should get str:preser_name
     match args[0]:
         case 'off':
             print('GOT: OFF')
-            rylr.send(1, 'all presetoff'.encode('ascii'))
-            rylr.send(2, 'all presetoff'.encode('ascii'))
-            rylr.send(3, 'all presetoff'.encode('ascii'))
-            
+            msg = [0,0,0,0,0]
+            utils.rylr.send(1, utils.pack_octal(*msg))
 
         case 'test':
             print('GOT: TEST')
-##            utils.send_all_nodes(thismesh, rylr, 'presettest 1')
-##            rylr.send(1, '1 presettest'.encode('ascii'))
-            rylr.send(0, 'all presettest'.encode('ascii'))
-            
+            msg = [0,0,0,0,1]
+            utils.rylr.send(1, utils.pack_octal(*msg))
             
         case 'spotlight':
             print("GOT: SPOTLIGHT")
-            rylr.send(1, 'all presetspotlight'.encode('ascii'))
-            rylr.send(2, 'all presetspotlight'.encode('ascii'))
-            rylr.send(3, 'all presetspotlight'.encode('ascii'))
+            msg = [0,0,0,0,2]
+            utils.rylr.send(1, utils.pack_octal(*msg))
 
         case 'nature':
             print('GOT: NATURE')
-            rylr.send(1, 'all presetnature'.encode('ascii'))
-            rylr.send(2, 'all presetnature'.encode('ascii'))
-            rylr.send(3, 'all presetnature'.encode('ascii'))
+            msg = [0,0,0,0,3]
+            utils.rylr.send(1, utils.pack_octal(*msg))
 
         case 'dystopia':
             print('GOT: DYST')
-            rylr.send(1, 'all presetdystopia'.encode('ascii'))
-            rylr.send(2, 'all presetdystopia'.encode('ascii'))
-            rylr.send(3, 'all presetdystopia'.encode('ascii'))
+            msg = [0,0,0,0,4]
+            utils.rylr.send(1, utils.pack_octal(*msg))
 
         case 'irl':
             print('GOT: IRL')
-            rylr.send(1, 'all presetirl'.encode('ascii'))
-            rylr.send(2, 'all presetirl'.encode('ascii'))
-            rylr.send(3, 'all presetirl'.encode('ascii'))
-            
-            
-            
-
+            msg = [0,0,0,0,5]
+            utils.rylr.send(1, utils.pack_octal(*msg))
+                   
 
 def fadein_handler(address, *args): #should get str:preset_name, int:fade_ms
     print_osc(address, *args)
