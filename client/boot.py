@@ -46,7 +46,7 @@ def listen_to_host(): #this is the second core functionality
         if not received_msg == None:
             #print(received_msg)
 
-            #if not 2 bytes, so is not an animation command, handle command
+            #if not 2 bytes, so is not an octal command, handle command
             if len(received_msg.data) !=2:
                 data_parsed = received_msg.data.decode("ascii").split()
                 if data_parsed[0] == 'pyexec':
@@ -60,9 +60,12 @@ def listen_to_host(): #this is the second core functionality
                     print('got nuke, dleteing boot and restetting machine...')
                     os.remove('boot.py')
                     machine.reset()
+                
+                elif data_parsed['0'] == 'rt':
+                    rylr.send(host_id, 'rt'.encode('ascii'))
 
             else:
-                #if an anitmaiton command, change the current_animation flag
+                #if an octal command, change the current_animation flag
                 msg_unpacked = utils.unpack_octal(received_msg.data) 
 
                 lock.acquire()

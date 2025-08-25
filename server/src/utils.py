@@ -47,18 +47,40 @@ def ping(id_to_ping):
     pass
 
 def time_roundtrip(id_to_time, trips=50, delay_between_trips = 0):
-    times = []
+    send_times = []
+    recieve_times = []
     for i in range(0, trips):
         start_time = int(time.perf_counter()*1000000)
         #ryrl.nonblockingrawsend()
-        #waitforresponce()
+        rylr.send(id_to_time, 'rt'.encode('ascii'))#ascii encoding here will be 2 bytes which is the same size as the octal commands
+        #waitforresponce()                           #so it will take the same amount of time over uart as a hypothetical animation command
+        for i in range(10000):
+            if rylr.check_send_status():
+                break
+        recieve_start_time = int(time.perf_counter()*1000000)
+        recieve_end_time = 0
+        for i in range(10000):
+            msg = rylr.receive()
+            if not msg == None:
+                    try:
+                        decoded = msg.data.decode('ascii')
+                        if decoded == 'rt':
+                            recieve_end_time = int(time.perf_counter()*1000000)
+                            break
+                    except:
+                        print('NA')
+        
         end_time = int(time.perf_counter()*1000000)
-        times.append(end_time-start_time)
+        send_times.append(end_time-start_time)
+        recieve_times.append(recieve_end_time-recieve_start_time)
         time.sleep(delay_between_trips)
         if delay_between_trips > 5:
             print(f'measurement of {end_time-start_time} taken')
-    avg_time = sum(times) / len(times)
-    print(f'with {trips} roundtrip(s) measured to module #{id_to_time}, average per roundtrip: {avg_time} microseconds')
+    avg_send_time = sum(send_times) / len(send_times)
+    avg_receive_time = sum(recieve_times) / len(recieve_times)
+    print(f'''with {trips} roundtrip(s) measured to module #{id_to_time},
+           average per roundtrip: {avg_send_time} microseconds, with average per send {avg_send_time-avg_receive_time} microseconds,
+            and average per receive {avg_receive_time} microseconds''')
 
 
 def ping_all():
