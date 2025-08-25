@@ -1,3 +1,5 @@
+import time
+
 import machine #type:ignore
 try:
     import src.reyax as reyax
@@ -13,11 +15,12 @@ try:
 except:
     print("!couldnt import animations.py from src!")
 
-import _thread
-import time
+import _thread	
 import os
 from sys import print_exception
 
+
+led = machine.Pin(25, machine.Pin.OUT)
 
 print('> Setting up system')
 lock = _thread.allocate_lock()    
@@ -69,16 +72,19 @@ def listen_to_host(): #this is the second core functionality
 
         time.sleep_us(10)
 
-
+led.on() 
 print('> Setting up LoRa')
-rylr = reyax.connection_setup(self_id)
+rylr = reyax.safe_reyax_connection_setup(self_id)
+led.off()
 print("> Setting up the file system")
 utils.file_system_setup()
 
+
 print('> Starting the second thread  for server....')#only two per pico are possible
 _thread.start_new_thread(listen_to_host, ())#empty tuple is args
+#TODO: REPL GRACE PERIOD HERE
 
-#TODO: REPL GRACE PERIOD HERE  
+print("workin")
 while True: #start actively tracking animations
     try:
         lock.acquire() 
@@ -116,8 +122,3 @@ while True: #start actively tracking animations
     except Exception as e:
         print_exception(e)
         break
-
-
-
-
-

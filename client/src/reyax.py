@@ -159,6 +159,21 @@ class RYLR998:
                     return
         raise TimeoutError("Reset not confirmed")
 
+def safe_reyax_connection_setup(id, max_retries=5):
+    import time
+    from src import reyax
+    for i in range(max_retries):
+        try:
+            print(f"> LoRa setup try {i+1}")
+            rylr = reyax.connection_setup(id)
+            print("> LoRa setup succeeded")
+            return rylr
+        except Exception as e:
+            print(f"! LoRa setup failed: {e}")
+            time.sleep(1)
+    raise RuntimeError("LoRa module not responding")
+
+
 
 def connection_setup(self_address: int) -> RYLR998:
     uart = machine.UART(1, baudrate=115200, tx=machine.Pin(4), rx=machine.Pin(5))
@@ -170,3 +185,4 @@ def connection_setup(self_address: int) -> RYLR998:
     msg = f"> Module #{self_address} online".encode()
     rylr.send(65335, msg)
     return rylr
+
