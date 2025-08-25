@@ -60,18 +60,18 @@ def listen_to_host(): #this is the second core functionality
                     print('got nuke, dleteing boot and restetting machine...')
                     os.remove('boot.py')
                     machine.reset()
-                
-                elif data_parsed['0'] == 'rt':
-                    rylr.send(host_id, 'rt'.encode('ascii'))
 
             else:
-                #if an octal command, change the current_animation flag
+                #if an octal command, change the current_animation flag/process
                 msg_unpacked = utils.unpack_octal(received_msg.data) 
-
-                lock.acquire()
-                animationutils.current_animation_flag = reference[msg_unpacked[-1]]
-                lock.release()
-                #print(msg_unpacked[-1])
+                if msg_unpacked[0]==1:
+                    rylr.send(host_id, 'rt'.encode('ascii'))
+                else:
+                    lock.acquire()
+                    animationutils.current_animation_flag = reference[msg_unpacked[-1]]
+                    lock.release()
+                    #print(msg_unpacked[-1])
+                
 
         time.sleep_us(10)
 

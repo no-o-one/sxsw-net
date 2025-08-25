@@ -46,13 +46,14 @@ def unpack_octal(packed: bytes) -> list:
 def ping(id_to_ping):
     pass
 
-def time_roundtrip(id_to_time, trips=50, delay_between_trips = 0):
+def time_roundtrip(id_to_time, trips=50, delay_between_trips = 0): #this is actually a bit incorrect because the timing of the "receive"
+    #starts right after calling send which doesnt take into account the over the air send time (i think)
     send_times = []
     recieve_times = []
     for i in range(0, trips):
         start_time = int(time.perf_counter()*1000000)
         #ryrl.nonblockingrawsend()
-        rylr.send(id_to_time, 'rt'.encode('ascii'))#ascii encoding here will be 2 bytes which is the same size as the octal commands
+        rylr.send(id_to_time, pack_octal(1,0,0,0,0))#ascii encoding here will be 2 bytes which is the same size as the octal commands
         #waitforresponce()                           #so it will take the same amount of time over uart as a hypothetical animation command
         for i in range(10000):
             if rylr.check_send_status():
