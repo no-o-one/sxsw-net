@@ -47,7 +47,7 @@ class ReceivedMessage:
 
 
 class RYLR998:
-    def __init__(self, uart: machine.UART):
+    def __init__(self, uart):
         self._uart = uart
         self._rxbuf = b''
         self._pending_cmd = None
@@ -75,7 +75,7 @@ class RYLR998:
         cmd = b"AT+SEND=%d,%d," % (address, len(data)) + data + b"\r\n"
         self._uart.write(cmd)
         self._pending_cmd = "send"
-        self._pending_cmd_start = time.ticks_ms()
+        self._pending_cmd_start = ticks_ms()
         self._pending_cmd_timeout = 8000
         self._last_send_status = None
 
@@ -95,7 +95,7 @@ class RYLR998:
                 self._rxbuf += data
             else:
                 raise Exception(f"Unexpected response: {data}")
-        if time.ticks_diff(time.ticks_ms(), self._pending_cmd_start) > self._pending_cmd_timeout:
+        if ticks_ms() - self._pending_cmd_start > self._pending_cmd_timeout:
             self._pending_cmd = None
             raise TimeoutError("Send confirmation not received")
         return False
@@ -122,8 +122,8 @@ class RYLR998:
 
     def _wait_for_response(self, timeout_ms):
         self._collect_rx()
-        start = time.ticks_ms()
-        while time.ticks_diff(time.ticks_ms(), start) < timeout_ms:
+        start = ticks_ms()
+        while ticks_ms() - start < timeout_ms:
             if self._uart.any():
                 data = self._uart.read()
                 if data.startswith(b"+RCV"):
@@ -155,10 +155,10 @@ class RYLR998:
 
     def software_reset(self):
         self._uart.write(b"AT+RESET\r\n")
-        start = time.ticks_ms()
+        start = ticks_ms()
         expected = b"+RESET\r\n+READY\r\n"
         collected = b""
-        while time.ticks_diff(time.ticks_ms(), start) < 5000:
+        while ticks_ms() - start < 5000:
             if self._uart.any():
                 collected += self._uart.read()
                 if collected == expected:

@@ -27,7 +27,7 @@ Module ids range 1-65535. 0 address cannot be addressed individually, all commun
 
 <br>
 
-# Software documentation 
+# Software documentation <- needs an update
 All the files running server side - on the QLAB_maincomputer - are located in the `server folder`, all of the ones running locally on each node are in the `client folder` of this repo
 
 
