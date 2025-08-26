@@ -184,7 +184,38 @@ class RYLR998:
             return decoded[5:]
         except Exception as e:
             raise Exception(f"Failed to parse UID from response: {resp} => {e}")
+    
+    def set_parameters(self, sf: int, bw: int, cr: int, pl: int):
+        """
+        Set LoRa modulation parameters.
+        sf: Spreading Factor (6-12)
+        bw: Bandwidth (125, 250, or 500)
+        cr: Coding Rate (1-4) => 4/5 to 4/8
+        pl: Preamble Length (5-65535)
+        """
+        if sf < 6 or sf > 12:
+            raise ValueError("Spreading Factor must be between 6 and 12")
+        if bw not in [7,8,9]:
+            raise ValueError("Bandwidth must be 7 (for 125), 8 (for 250), or 9 (for 500)")
+        if cr < 1 or cr > 4:
+            raise ValueError("Coding Rate must be between 1 and 4")
+        if pl < 5 or pl > 65535:
+            raise ValueError("Preamble Length must be between 5 and 65535")
 
+        cmd = f"AT+PARAMETER={sf},{bw},{cr},{pl}\r\n".encode()
+        self._uart.write(cmd)
+        resp = self._wait_for_response(1000)
+        if resp != b"+OK\r\n":
+            raise Exception(f"Set parameters failed: {resp}")
+        
+    def get_parameters(self) -> str:
+        self._uart.write(b"AT+PARAMETER?\r\n")
+        resp = self._wait_for_module_response(b"+PARAMETER")
+        try:
+            decoded = resp.decode('ascii')
+            return decoded
+        except Exception as e:
+            raise Exception(f"Failed to parse UID from response: {resp} => {e}")
 
 
 
