@@ -1,17 +1,3 @@
-"""
-Lightweight driver for interfacing with the RYLR998 LoRa module by REYAX.
-Author Tim Hanewich, github.com/TimHanewich
-Find updates to this code: https://github.com/TimHanewich/MicroPython-Collection/blob/master/REYAX-RYLR998/
-
-MIT License
-Copyright 2024 Tim Hanewich
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-this file has been fully reworked
-"""
-
 import machine
 import time
 import ubinascii
@@ -58,7 +44,7 @@ class RYLR998:
 
         cmd = b"AT+SEND=%d,%d," % (address, len(data)) + data + b"\r\n"
         self._uart.write(cmd)
-        resp = self._wait_for_response(8000)
+        resp = self._wait_for_module_response(b"+OK", 8000)
         if resp != b"+OK\r\n":
             raise Exception(f"Send failed: {resp}")
 
@@ -91,7 +77,7 @@ class RYLR998:
                 raise Exception(f"Unexpected response: {data}")
         if time.ticks_diff(time.ticks_ms(), self._pending_cmd_start) > self._pending_cmd_timeout:
             self._pending_cmd = None
-            raise TimeoutError("Send confirmation not received")
+            raise  Exception("Send confirmation not received")
         return False
 
     def receive(self):
@@ -125,7 +111,7 @@ class RYLR998:
                 else:
                     return data
             time.sleep_ms(1)
-        raise TimeoutError("No response received in time")
+        raise  Exception("No response received in time")
 
     def pulse(self):
         self._uart.write(b"AT\r\n")
@@ -157,7 +143,51 @@ class RYLR998:
                 collected += self._uart.read()
                 if collected == expected:
                     return
-        raise TimeoutError("Reset not confirmed")
+        raise  Exception("Reset not confirmed")
+    
+    def _wait_for_module_response(self, prefix: bytes, timeout_ms: int = 2000) -> bytes:
+        start = time.ticks_ms()
+        buffer = b""
+
+        while time.ticks_diff(time.ticks_ms(), start) < timeout_ms:
+            if self._uart.any():
+                chunk = self._uart.read()
+                if chunk:
+                    #print("RAW:", repr(chunk))  # Debug
+                    buffer += chunk
+
+                    # Clean out \xff or other noise
+                    cleaned = buffer.replace(b'\xff', b'').replace(b'\x00', b'')
+
+                    # Check each line
+                    lines = cleaned.split(b'\r\n')
+                    for line in lines:
+                        if line.startswith(prefix): 
+                            #print("MATCH:", line)
+                            return line
+
+            time.sleep_ms(50)
+
+        raise Exception(f"No response with prefix {prefix.decode()} received in time.")
+
+    
+    def get_uid(self) -> str:
+        """
+        Retrieves the DevEUI (UID) of the RYLR998 module.
+        Returns:
+            A string representing the UID (hex).
+        """
+        self._uart.write(b"AT+UID?\r\n")
+        resp = self._wait_for_module_response(b"+UID")
+        try:
+            decoded = resp.decode('ascii')
+            return decoded[5:]
+        except Exception as e:
+            raise Exception(f"Failed to parse UID from response: {resp} => {e}")
+
+
+
+
 
 def safe_reyax_connection_setup(id, max_retries=5):
     import time
@@ -173,8 +203,6 @@ def safe_reyax_connection_setup(id, max_retries=5):
             time.sleep(1)
     raise RuntimeError("LoRa module not responding")
 
-
-
 def connection_setup(self_address: int) -> RYLR998:
     uart = machine.UART(1, baudrate=115200, tx=machine.Pin(4), rx=machine.Pin(5))
     rylr = RYLR998(uart)
@@ -185,4 +213,5 @@ def connection_setup(self_address: int) -> RYLR998:
     msg = f"> Module #{self_address} online".encode()
     rylr.send(65335, msg)
     return rylr
+
 

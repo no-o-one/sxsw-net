@@ -83,45 +83,45 @@ print("> Setting up the file system")
 utils.file_system_setup()
 
 
-print('> Starting the second thread  for server....')#only two per pico are possible
+print('> Starting the second thread for server....')#only two per pico are possible
 _thread.start_new_thread(listen_to_host, ())#empty tuple is args
 #TODO: REPL GRACE PERIOD HERE
 
 print("workin")
-while True: #start actively tracking animations
-    try:
-        lock.acquire() 
-        cur_anim_local = animationutils.current_animation_flag  
-        lock.release() 
-        if animationutils.last_animation_flag != cur_anim_local:   
-            if animationutils.last_animation_flag != 'none':
-                animationutils.AnimationInstance.kill_all() 
-            if cur_anim_local == 'test':
-                servo_test.reset(); jewel_test.reset()
-                servo_test.play(); jewel_test.play()
+# while True: #start actively tracking animations
+#     try:
+#         lock.acquire() 
+#         cur_anim_local = animationutils.current_animation_flag  
+#         lock.release() 
+#         if animationutils.last_animation_flag != cur_anim_local:   
+#             if animationutils.last_animation_flag != 'none':
+#                 animationutils.AnimationInstance.kill_all() 
+#             if cur_anim_local == 'test':
+#                 servo_test.reset(); jewel_test.reset()
+#                 servo_test.play(); jewel_test.play()
 
-            elif cur_anim_local == 'spotlight':
-                servo_spotlight.reset(); jewel_spotlight.reset()
-                servo_spotlight.play(); jewel_spotlight.play()
+#             elif cur_anim_local == 'spotlight':
+#                 servo_spotlight.reset(); jewel_spotlight.reset()
+#                 servo_spotlight.play(); jewel_spotlight.play()
 
-            elif cur_anim_local == 'nature':
-                servo_nature.reset(); jewel_nature.reset()
-                servo_nature.play(); jewel_nature.play()
+#             elif cur_anim_local == 'nature':
+#                 servo_nature.reset(); jewel_nature.reset()
+#                 servo_nature.play(); jewel_nature.play()
 
-            elif cur_anim_local == 'dystopia':
-                servo_dystopia.reset(); jewel_dystopia.reset()
-                servo_dystopia.play(); jewel_dystopia.play()
+#             elif cur_anim_local == 'dystopia':
+#                 servo_dystopia.reset(); jewel_dystopia.reset()
+#                 servo_dystopia.play(); jewel_dystopia.play()
 
-            elif cur_anim_local == 'irl':
-                servo_irl.reset(); jewel_irl.reset()
-                servo_irl.play(); jewel_irl.play()
+#             elif cur_anim_local == 'irl':
+#                 servo_irl.reset(); jewel_irl.reset()
+#                 servo_irl.play(); jewel_irl.play()
 
-            elif cur_anim_local == 'off':
-                this_servo.set(0) 
-                this_jewel.set(0)
+#             elif cur_anim_local == 'off':
+#                 this_servo.set(0) 
+#                 this_jewel.set(0)
     
-        animationutils.last_animation_flag = cur_anim_local  
-        time.sleep_us(10)
-    except Exception as e:
-        print_exception(e)
-        break
+#         animationutils.last_animation_flag = cur_anim_local  
+#         time.sleep_us(10)
+#     except Exception as e:
+#         print_exception(e)
+#         break
