@@ -48,13 +48,13 @@ This is a bash script that sets up the virtual python environment, installs all 
 where the python code for the actual server is. starts the server on localhost 127.0.0.1:8080 and gives access to REPL for debugging. to stop the server just kill the REPL with ctrl+D or `exit()`
 
 ### src/Mesh.py
-Class to create objects of the network mesh. The mesh object would be a double nested list; so list of branches, where each branch is a list of node IDs in it. this means that the mesh structure would not be in any way connected to nominal IDs of the nodes, which will make it easier to manage and be able to restructure the mesh network topology if needed [WIP]
+Class to create objects of the network mesh. The mesh object would be a double nested list; so list of branches, where each branch is a list of node IDs in it. this means that the mesh structure is not in any way connected to nominal IDs of the nodes
 
 ### src/utils.py
 a place to put miscellaneous functions that help with programming/debugging 
 
 ### src/reyax.py 
-A python adapted version of a [micropython RYLR998 driver](https://github.com/TimHanewich/MicroPython-Collection/blob/master/REYAX-RYLR998/reyax.py) i found [here](https://timhanewich.medium.com/how-to-use-a-reyax-rylr998-lora-module-with-a-raspberry-pi-pico-and-other-microcontrollers-4ae52686836f)
+This is a micropython driver for a RYRL998 with specifically non blocking functionality (safety precautions must be taken!!). it is now a fully rewritten different thing, but originally i used this [micropython RYLR998 driver](https://github.com/TimHanewich/MicroPython-Collection/blob/master/REYAX-RYLR998/reyax.py) i found [here](https://timhanewich.medium.com/how-to-use-a-reyax-rylr998-lora-module-with-a-raspberry-pi-pico-and-other-microcontrollers-4ae52686836f), and this is the reference that i was using when writing the one in place now
 
 ### pyserialwrapper.py
 the RYLR driver uses machine.UART module which is not for standard python. this wrapper class to makes it so the RYLR998 driver is compatible with the pyserial module that is used instead 
@@ -63,15 +63,33 @@ the RYLR driver uses machine.UART module which is not for standard python. this 
 ## Client side
 
 ### src/reyax.py 
-[micropython RYLR998 driver](https://github.com/TimHanewich/MicroPython-Collection/blob/master/REYAX-RYLR998/reyax.py) i found [here](https://timhanewich.medium.com/how-to-use-a-reyax-rylr998-lora-module-with-a-raspberry-pi-pico-and-other-microcontrollers-4ae52686836f)
+This is a  client versoin of the micropython driver for a RYRL998 with specifically non blocking functionality (safety precautions must be taken!!). it is now a fully rewritten different thing, but originally i used this [micropython RYLR998 driver](https://github.com/TimHanewich/MicroPython-Collection/blob/master/REYAX-RYLR998/reyax.py) i found [here](https://timhanewich.medium.com/how-to-use-a-reyax-rylr998-lora-module-with-a-raspberry-pi-pico-and-other-microcontrollers-4ae52686836f), and this is the reference that i was using when writing the one in place now. The client version also has functionality added to retrieve the module's inbuilt id, as well as set the RF settings.
+
+
+### src/jewelutils.py 
+class for creating a neopixel object for controlling the jewel. here also the pio program that is used for async nopixel protocol generation is defined.
+
+### src/servoutils.py 
+class for creating a servo object for controlling the servo
 
 ### src/utils.py 
-functions that help with programming. this is where the animation rendering functions and the functions that control hardware (motor, leds, setting up the rylr) are defined
+general utilities to be used in boot.py
 
 ### boot.py
-runs on startup.
+runs on startup. listens to the host module on core 2. one core one tracks and controlls the animations and animation states.
 
-there are three processes that need to be dealt with concurrently/cooperatively - LoRa polling (must process servers messages near instantly), animation rendering (must be interrupt-able even mid animation, and animations need to loop), and REPL/usb serial for debug and reprogramming. Currently attempting to have animation rendering and usb serial/repl handled with uasyncio on core 0 and lora polling on thread 2 (failing).
+### src/animationutils.py
+holds class `AnimationInstance` and `Animation Controller`
+#### `AnimationInstance`
+ establishes an instance of an animation (a singular curve), the curves shape and the means to control it via a virtual periodic timer so it runs async.
+#### `AnimationController`
+ creates a full animation object as a sequence of animation instances. this is so that animations can be complex and can contain multiple curves and be also controlled async. needs to be adapted to control the servo and the jewel at the same time
 
-currently uses _thread module to have `listen_to_host()` function run indefinitely on the second core - thats because the method uses serial to poll the lora module for incoming server messages, and even though the module is initialized with picos uart1 (see `connection_setup()` in `utils.py`), in my previous testing i found that it still blocks the usb serial, meaning reprogramming and access to repl is impossible if run on core 0. I looked it up, and the second thread does actually run on the second core with the same py interpreter, meaning blocking processes on core 1 do not affect core 0 with the usb serial and repl. core 1 is unable to run uasyncio as it is neither heap nor thread safe. 
+### src/animation.py
+this is where the particular preset animations are defined using `animationutils.py` classes. these are then imported for use in boot.py
+
+
+
+
+
 

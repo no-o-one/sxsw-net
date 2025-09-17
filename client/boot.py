@@ -85,7 +85,6 @@ utils.file_system_setup()
 
 #print('> Starting the second thread for server....')#only two per pico are possible
 #_thread.start_new_thread(listen_to_host, ())#empty tuple is args
-#TODO: REPL GRACE PERIOD HERE
 
 print("workin")
 # while True: #start actively tracking animations
