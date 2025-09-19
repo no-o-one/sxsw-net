@@ -86,7 +86,15 @@ utils.file_system_setup()
 #print('> Starting the second thread for server....')#only two per pico are possible
 #_thread.start_new_thread(listen_to_host, ())#empty tuple is args
 
+print('pinging for address')
+loramodule_UID = rylr.get_uid()
+rylr.send('init '+loramodule_UID)
+
+#now we are sending the inbuilt lra id to get the short id mapping 
+
 print("workin")
+
+
 # while True: #start actively tracking animations
 #     try:
 #         lock.acquire() 

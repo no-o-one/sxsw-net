@@ -32,6 +32,8 @@ All the files running server side - on the QLAB_maincomputer - are located in th
 
 
 ## Server side
+module listening logic is now implemented server side too
+
 **To start the server:** 
 1. open terminal and plug in the LoRa module 
 2. run `ls /dev/tty.*`  to check the list of available ports, the one you are looking for will look something like `/dev/tty.usbserial-XX` (idk why yet but the port number changes every time you plug the module in)
@@ -87,6 +89,13 @@ holds class `AnimationInstance` and `Animation Controller`
 
 ### src/animation.py
 this is where the particular preset animations are defined using `animationutils.py` classes. these are then imported for use in boot.py
+
+## ID system
+to ensure constant module ids across reboots and reflashes, so that every physical node has a consistent id, i will make use of the fact that every lora module comes with a hard coded 12 byte UID. Upon startup module side each module will retrieve it and send it to the server. Server side there will be a lookup table that maps it to a short 1 byte (0-255) ID that will be used internally.
+
+## Internal Protocol
+upon satartup every node will send an ascii encoded string starting ("init [module UID]"); whe inquiring hte lora module, becuase it operates on the AT portocol all data it returns is ascii data. thus it is anyway easier to send this data over in the type it was recieved, and the fractions of a second tha that would be saved if i was to convert it to raw bits would not matter either way, as we dont really care about abos;utely minimising latency on the frew stratup processes that are rewuired (it is actually not clear fromt he documentation what type of data is the uid, but judgin by the fact that it is clearly defined as 12bytes, it then is probably a string represenation of a base16 (hex) encoding of the 12 byte UID)
+
 
 
 

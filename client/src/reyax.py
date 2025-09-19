@@ -171,17 +171,18 @@ class RYLR998:
         raise Exception(f"No response with prefix {prefix.decode()} received in time.")
 
     
-    def get_uid(self) -> str:
+    def get_uid(self): #returns bytes
         """
         Retrieves the DevEUI (UID) of the RYLR998 module.
         Returns:
             A string representing the UID (hex).
         """
         self._uart.write(b"AT+UID?\r\n")
-        resp = self._wait_for_module_response(b"+UID")
+        resp = self._wait_for_module_response(b"+UID") 
         try:
-            decoded = resp.decode('ascii')
-            return decoded[5:]
+            decoded = resp.decode('ascii') # this is likely a hex number of the 12 byte id so decode it and return a hex
+            in_str = decoded[5:].strip()
+            return bytes.fromhex(in_str)
         except Exception as e:
             raise Exception(f"Failed to parse UID from response: {resp} => {e}")
     
