@@ -127,7 +127,6 @@ j_bloom_warmup =  AnimationController([ AnimationInstance(this_jewel, 'cubic_in_
 j_bloom_warmup_die =  AnimationController([ AnimationInstance(this_jewel, 'bounce', 3, 300, [75, 9, 1], [0,0,0])
                                                   ], False)
 
-j_testr =  AnimationController([ AnimationInstance(this_jewel, 'bounce', 3, 100, [0,0,0], [50,100,20])], False)
 
 soft_open_late =  AnimationController([ AnimationInstance(this_servo, 'quint_out', 3, 60, 100, 165)], False)
 soft_open_late_loop =  AnimationController([ AnimationInstance(this_servo, 'quint_out', 3, 60, 100, 135),

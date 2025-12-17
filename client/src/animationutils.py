@@ -5,13 +5,13 @@ except:
 
 
 
-current_animation_flag = 'none' #shared flag between two cores and boot.py
+current_animation_flag = 'none' #shared flag between the two threads
 last_animation_flag = 'none'
 
 
 
 class AnimationInstance():
-    _instances = []  # Prevents garbage collection but like.. eh
+    _instances = []  #List of all instances created, although prevents garbage collection
 
     @classmethod
     def get_instances(cls):
@@ -26,22 +26,22 @@ class AnimationInstance():
     def __init__(self, peripheral, curve, length, fps, start_keyframe, end_keyframe):
         '''ARGS >
         
-        preipheral - an object of a class Servo/Neopixel
+        peripheral - an object of a class Servo/Neopixel
         curve:str - options being 'cubic_in', 'cubic_out', cubic_in_out', 'quint_in', 'quint_out', 'quint_in_out', 'bounce', 'linear' 
         length:int - in seconds
         fps:int
-        start_keyframe:int - start angle/color
+        start_keyframe:int - start angle/color or a list [R,G,B]
         end_keyframe:int - end angle/color'''
         self.peripheral = peripheral
         self.curve = curve
         self.length = length
         self.fps = fps
-        self.total_frames = self.length * self.fps
-        self.ms_between_frames = int(1000 / self.fps)
-        self.start_keyframe = start_keyframe #could be a list for the jewel
-        self.end_keyframe = end_keyframe #could be a list for the jewel
+        self.total_frames = self.length * self.fps #used for tracking current frames and calculating values with animation curves
+        self.ms_between_frames = int(1000 / self.fps) #used for tracking current frames and calculating values with animation curves
+        self.start_keyframe = start_keyframe 
+        self.end_keyframe = end_keyframe 
         self.timer = machine.Timer(-1)
-        self.callcount = 0
+        self.callcount = 0 #used for tracking current frames and calculating values with animation curves
         AnimationInstance._instances.append(self) #Adds self to the list of all created AnimationController objects
 
     def _callback_wrapper(self, controller):
@@ -49,15 +49,18 @@ class AnimationInstance():
            not take any other arguments other than the timer that initiated the callback, and the controller where callback originated
            also needs to be tracked'''
         def _callback(timer):
-            global last_animation_flag
-            if self.callcount <= self.total_frames:
-                self.peripheral.set(self.render_frame(self.callcount))
+            '''this is called every time a timer triggers a next 'tick' '''
+            #global last_animation_flag #shared flag update-to-be i guess
+
+            if self.callcount <= self.total_frames: #progress onto the next frame
+                self.peripheral.set(self._render_frame(self.callcount))
                 self.callcount += 1
-            else:
+
+            else: #finish animation instance, move on the next one if queued
                 self.callcount = 0
                 timer.deinit()
                 if controller:
-                    controller.move_to_next_step()
+                    controller._move_to_next_step()
         return _callback
 
     def play(self, called_by_controller=None):
@@ -74,7 +77,7 @@ class AnimationInstance():
     def kill(self):
         self.timer.deinit()
 
-    def render_frame(self, at_frame):
+    def _render_frame(self, at_frame):
         # Normalize progression to 0.0 - 1.0
         t = at_frame / self.total_frames
 
@@ -121,13 +124,14 @@ class AnimationInstance():
                 value[i] = int(self.start_keyframe[i] + (self.end_keyframe[i] - self.start_keyframe[i]) * eased)
         else:
             value = int(self.start_keyframe + (self.end_keyframe - self.start_keyframe) * eased)
+        #return value to set the peripheral to
         return value
 
 
         
 
 class AnimationController():
-    _instances = []#prevents garbage collection but i think thats okay
+    _instances = [] #List of all instances created, although prevents garbage collection
     
     @classmethod
     def get_instances(cls):
@@ -145,12 +149,12 @@ class AnimationController():
         sequence:list of Animation_Instance objects
         is_looping:boolean - set to true by default"""
         self.sequence = sequence 
-        self._current_step_index = 0
+        self._current_step_index = 0 #used for tracking what anim is currently on
         self.is_looping = is_looping
         self.__class__._instances.append(self) #Adds self to the list of all created AnimationController objects
 
 
-    @property
+    @property 
     def sequence(self):
         return self._sequence
     
@@ -160,8 +164,8 @@ class AnimationController():
             raise TypeError('must be a list of AnimationInstance objects')
         self._sequence = val
 
-    @property
-    def current_step_index(self):
+    @property 
+    def current_step_index(self): #needs to be a property here so that can trigger code in current_step_index_setter
         return self._current_step_index
     
     @current_step_index.setter
@@ -174,7 +178,8 @@ class AnimationController():
         if val !=0:
             self.sequence[self.current_step_index].play()
 
-    def move_to_next_step(self):
+    def _move_to_next_step(self):
+        #gets triggered by the AnimationInstance timer callback when the instance finishes playing and the next Instance can be triggered
 
         if self.current_step_index < len(self.sequence) - 1:
             self.current_step_index += 1
