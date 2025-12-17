@@ -1,3 +1,7 @@
+'''the RYLR driver uses machine.UART module which is not for standard python. this wrapper class to makes it so the RYLR998 driver is compatible with the pyserial module that is used instead
+
+used in src/utils to init the lora module'''
+
 import serial
 
 class pyserialUARTwrapper:

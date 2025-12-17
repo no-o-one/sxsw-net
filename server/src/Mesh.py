@@ -8,8 +8,10 @@ class Mesh:
         self.has_center = has_center
     
     def get_nodes(self, branch_id=None):
-        """ARGS > branch_id:int (optional, returns all nodes in all branches if not specified)
-        returns all node ids in the mesh as a list"""
+        """ARGS >
+        branch_id:int (optional, returns all nodes in all branches if not specified)
+
+        returns: all node ids in the mesh as a list"""
         if branch_id == None:
             toreturn = []
             for branch in self.mesh:

@@ -1,3 +1,16 @@
+"""Includes general functions to be used across the program
+
+IMPORTANT: this file inits the RYLR998 object the as 'rylr' and inits the current Mesh object as this_mesh
+!!!AVOID CIRCULAR IMPORTS!!!
+
+Full list of functions:
+    pack_octal(..)
+    unpack_octal(...)
+    ping(...)
+    time_roundtrip(...)
+    ping_all(...)
+    send_all(...)"""
+
 import time
 import src.pyserialwrapper as pyserialwrapper
 import src.reyax as reyax
@@ -17,12 +30,16 @@ except Exception as e:
     print(f'!WARNING! Connection to LoRa at {port} with baudrate {baudrate} failed with the following: \n{e}')
 
 #setup existing mesh of nodes
-thismesh = Mesh([[1,2,3]])
+this_mesh = Mesh([[1,2,3]])
 
 
 def pack_octal(d0, d1, d2, d3, d4) -> bytes:
     """Packs 5 octal digits (0–7 each) into exactly 2 bytes (15 bits).
-    all digits MUST be 0-7, so it must be an octal number"""
+    all digits MUST be 0-7, so it must be an octal number; used for low latency internal network protocol
+    
+    returns a bytes object
+    ARGS > 
+    d0 through d4, all ints 0-7 each"""
     digits = [d0, d1, d2, d3, d4]
     bits = 0
     for digit in digits:
@@ -31,7 +48,9 @@ def pack_octal(d0, d1, d2, d3, d4) -> bytes:
 
 
 def unpack_octal(packed: bytes) -> list:
-    """Unpacks 2 bytes into a list of 5 octal digits (as integers)."""
+    """Unpacks 2 bytes into a list of 5 octal digits (as integers); used for low latency internal network protocol
+    
+    returns a list of ints"""
     if len(packed) != 2:
         return []
 
@@ -48,6 +67,13 @@ def ping(id_to_ping):
 
 def time_roundtrip(id_to_time, trips=50, delay_between_trips = 0): #this is actually a bit incorrect because the timing of the "receive"
     #starts right after calling send which doesnt take into account the over the air send time (i think)
+    """times a roundtrip message send to a  specific module id
+    
+    args:
+    id_to_time
+    trips:int - how many trips will be sampled to then average out time time from
+    delay_between_trips:int - to support spanning sampling across longer time periods"""
+    
     send_times = []
     recieve_times = []
     for i in range(0, trips):
@@ -85,6 +111,7 @@ def time_roundtrip(id_to_time, trips=50, delay_between_trips = 0): #this is actu
 
 
 def ping_all():
+    
     pass
 
 #send to all nodes with delay for animations, to sent to all insantaniously send to id 0

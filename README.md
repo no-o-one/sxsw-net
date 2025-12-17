@@ -27,7 +27,9 @@ Module ids range 1-65535. 0 address cannot be addressed individually, all commun
 
 <br>
 
-# Software documentation <- needs an update
+# Software documentation <- needs an update in some places
+> run `help(<thing_name>)` on functions, modules and objects to see what they do and what args they take - i should have a pretty good coverage in terms of documentation; Note: you can get the docstring of a class's constructor by running `help(<class_name>.__init__)`
+
 All the files running server side - on the QLAB_maincomputer - are located in the `server folder`, all of the ones running locally on each node are in the `client folder` of this repo
 
 
@@ -80,14 +82,7 @@ general utilities to be used in boot.py
 ### boot.py
 runs on startup. listens to the host module on core 2. one core one tracks and controlls the animations and animation states.
 
-### src/animationutils.py
-holds class `AnimationInstance` and `Animation Controller`
-#### `AnimationInstance`
- establishes an instance of an animation (a singular curve), the curves shape and the means to control it via a virtual periodic timer so it runs async.
-#### `AnimationController`
- creates a full animation object as a sequence of animation instances. this is so that animations can be complex and can contain multiple curves and be also controlled async. needs to be adapted to control the servo and the jewel at the same time
-
-### src/animation.py
+### src/animationS.py
 this is where the particular preset animations are defined using `animationutils.py` classes. these are then imported for use in boot.py
 
 ## ID system
@@ -98,7 +93,14 @@ upon satartup every node will send an ascii encoded string starting ("init [modu
 
 
 
+### src/animationutils.py and animation logic
+holds class `AnimationInstance` and `Animation Controller`
+#### `AnimationIns
+tance`
+ establishes an instance of an animation (a singular curve), the curves shape and the means to control it via a virtual periodic timer so it runs async.
+#### `AnimationController`
+ creates a full animation object as a sequence of animation instances. this is so that animations can be complex and can contain multiple curves and be also controlled async. needs to be adapted to control the servo and the jewel at the same time
 
-
+at this point then we will have to control jewel and servo async because they might have light and motion ainimations of different lengths
 
 

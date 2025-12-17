@@ -1,5 +1,9 @@
-import machine
-import os
+try:
+    from src.periphutils import *
+except:
+    print("!err from animationutils: couldnt import periphutils!")
+
+
 
 current_animation_flag = 'none' #shared flag between two cores and boot.py
 last_animation_flag = 'none'
@@ -7,10 +11,11 @@ last_animation_flag = 'none'
 
 
 class AnimationInstance():
-    _instances = []  # Prevents garbage collection
+    _instances = []  # Prevents garbage collection but like.. eh
 
     @classmethod
     def get_instances(cls):
+        '''Returns a list of all AnimationInstance objects created'''
         return cls._instances
 
     @classmethod
@@ -19,23 +24,34 @@ class AnimationInstance():
             instance.timer.deinit()
 
     def __init__(self, peripheral, curve, length, fps, start_keyframe, end_keyframe):
+        '''ARGS >
+        
+        preipheral - an object of a class Servo/Neopixel
+        curve:str - options being 'cubic_in', 'cubic_out', cubic_in_out', 'quint_in', 'quint_out', 'quint_in_out', 'bounce', 'linear' 
+        length:int - in seconds
+        fps:int
+        start_keyframe:int - start angle/color
+        end_keyframe:int - end angle/color'''
         self.peripheral = peripheral
         self.curve = curve
         self.length = length
         self.fps = fps
         self.total_frames = self.length * self.fps
         self.ms_between_frames = int(1000 / self.fps)
-        self.start_keyframe = start_keyframe
-        self.end_keyframe = end_keyframe
+        self.start_keyframe = start_keyframe #could be a list for the jewel
+        self.end_keyframe = end_keyframe #could be a list for the jewel
         self.timer = machine.Timer(-1)
         self.callcount = 0
-        AnimationInstance._instances.append(self)
+        AnimationInstance._instances.append(self) #Adds self to the list of all created AnimationController objects
 
     def _callback_wrapper(self, controller):
+        '''a wrapper method for a default timer callback method. this is needed because the in-built callback method does
+           not take any other arguments other than the timer that initiated the callback, and the controller where callback originated
+           also needs to be tracked'''
         def _callback(timer):
             global last_animation_flag
             if self.callcount <= self.total_frames:
-                self.peripheral.set(int(self.render_frame(self.callcount)))
+                self.peripheral.set(self.render_frame(self.callcount))
                 self.callcount += 1
             else:
                 self.callcount = 0
@@ -45,6 +61,9 @@ class AnimationInstance():
         return _callback
 
     def play(self, called_by_controller=None):
+        '''ARGS >
+        
+        called_by_controller (None by default), used for when the animation instance is a part of an animation sequence in a controller'''
         self.callcount = 0
         self.timer.init(
             mode=machine.Timer.PERIODIC,
@@ -94,9 +113,14 @@ class AnimationInstance():
                 eased = 7.5625 * t * t + 0.984375
         else:
             eased = t  # fallback to linear
-
+        i = 0
         # Interpolate between start and end keyframes
-        value = self.start_keyframe + (self.end_keyframe - self.start_keyframe) * eased
+        if(isinstance(self.start_keyframe, list)):
+            value=[0, 0, 0]
+            for i in range(0,3):
+                value[i] = int(self.start_keyframe[i] + (self.end_keyframe[i] - self.start_keyframe[i]) * eased)
+        else:
+            value = int(self.start_keyframe + (self.end_keyframe - self.start_keyframe) * eased)
         return value
 
 
@@ -107,6 +131,7 @@ class AnimationController():
     
     @classmethod
     def get_instances(cls):
+        '''Returns a list of all AnimationController objects created'''
         return cls._instances
 
     @classmethod
@@ -115,10 +140,14 @@ class AnimationController():
             instance.sequence[instance.current_step_index].timer.deinit()
 
     def __init__(self, sequence, is_looping=True):
-        self.sequence = sequence
+        """ARGS > 
+        
+        sequence:list of Animation_Instance objects
+        is_looping:boolean - set to true by default"""
+        self.sequence = sequence 
         self._current_step_index = 0
         self.is_looping = is_looping
-        self.__class__._instances.append(self)
+        self.__class__._instances.append(self) #Adds self to the list of all created AnimationController objects
 
 
     @property
@@ -137,9 +166,11 @@ class AnimationController():
     
     @current_step_index.setter
     def current_step_index(self, val):
-        #every time current step index get reassigned this will trigger (i think)
-        self._current_step_index = val
-        #will autoplay the step
+        '''triggers every time current step index gets reassigned.
+
+        calls play() on the AnimationInstance at the new index.
+        '''
+        self._current_step_index = val #uptade the index
         if val !=0:
             self.sequence[self.current_step_index].play()
 
@@ -158,7 +189,8 @@ class AnimationController():
 
     def play(self):
         self._current_step_index = 0
-        self.sequence[self.current_step_index].play(self)
+        self.sequence[self.current_step_index].play(self) #<AnimationInstance obj  @mem>.play()
     
     def reset(self):
         self._current_step_index = 0
+

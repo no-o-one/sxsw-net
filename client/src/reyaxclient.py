@@ -1,6 +1,6 @@
 import machine
 import time
-import ubinascii
+
 
 class ReceivedMessage:
     def __init__(self):
@@ -11,14 +11,24 @@ class ReceivedMessage:
         self.SNR = None
 
     def parse(self, full_line: bytes):
+        '''returns data as bytes'''
         try:
             parts = full_line.decode("ascii").strip().split(",")
             header, address = parts[0].split("=")
             self.address = int(address)
             self.length = int(parts[1])
-            self.data = parts[2].encode("ascii")  # leave as bytes
-            self.RSSI = int(parts[3])
-            self.SNR = int(parts[4])
+            self.RSSI = int(parts[-1])
+            self.SNR = int(parts[-2])
+            if (parts[2] != parts[-3]):
+                i = 3
+                self.data = parts[2].encode("ascii")
+                while parts[i] != parts[-2]:
+                    self.data += parts[i].encode("ascii")
+                    self.data += ",".encode("ascii")
+                self.data = self.data[1:-1]
+            else:
+                self.data = parts[2].encode("ascii")  
+
         except Exception as e:
             raise Exception(f"Failed to parse message: {full_line} => {e}")
 
@@ -33,7 +43,7 @@ class RYLR998:
         self._pending_cmd = None
         self._pending_cmd_start = 0
         self._pending_cmd_timeout = 0
-        self._last_send_status = None
+        # self._last_send_status = None
 
         while self._uart.any():
             self._uart.read()
@@ -113,15 +123,15 @@ class RYLR998:
             time.sleep_ms(1)
         raise  Exception("No response received in time")
 
-    def pulse(self):
+    def ping(self):
         self._uart.write(b"AT\r\n")
         try:
             resp = self._wait_for_response(1000)
-            return resp == b"+OK\r\n"
+            return resp #== b"+OK\r\n"
         except:
             return False
 
-    def address(self):
+    def get_address(self):
         self._uart.write(b"AT+ADDRESS?\r\n")
         resp = self._wait_for_response(1000)
         return int(resp.decode().strip().split("=")[1])
@@ -221,13 +231,25 @@ class RYLR998:
 
 
 
-def safe_reyax_connection_setup(id, max_retries=5):
-    import time
-    from src import reyax
+def create_rylr(self_address: int) -> RYLR998:
+    uart = machine.UART(1, baudrate=115200, tx=machine.Pin(4), rx=machine.Pin(5))
+    rylr = RYLR998(uart)
+    rylr.set_address(self_address)
+    if not rylr.ping():
+        print("WARNING: LoRa module test failed.")
+    print(f"> Connected module address: {self_address}")
+    #msg = f"> Module #{self_address} online".encode()
+    #rylr.send(65535, msg)
+    return rylr
+
+
+def safe_create_rylr(id, max_retries=5):
+    # import time
+    # from client.src import reyaxclient
     for i in range(max_retries):
         try:
             print(f"> LoRa setup try {i+1}")
-            rylr = reyax.connection_setup(id)
+            rylr = create_rylr(id)
             print("> LoRa setup succeeded")
             return rylr
         except Exception as e:
@@ -235,15 +257,9 @@ def safe_reyax_connection_setup(id, max_retries=5):
             time.sleep(1)
     raise RuntimeError("LoRa module not responding")
 
-def connection_setup(self_address: int) -> RYLR998:
-    uart = machine.UART(1, baudrate=115200, tx=machine.Pin(4), rx=machine.Pin(5))
-    rylr = RYLR998(uart)
-    rylr.set_address(self_address)
-    if not rylr.pulse():
-        print("WARNING: LoRa module test failed.")
-    print(f"> Connected module address: {self_address}")
-    msg = f"> Module #{self_address} online".encode()
-    rylr.send(65335, msg)
-    return rylr
+
+
+
+
 
 

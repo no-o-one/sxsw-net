@@ -3,6 +3,7 @@ from pythonosc.osc_server import BlockingOSCUDPServer
 import src.utils as utils
 import code
 import threading
+import time
 
 
 
@@ -14,7 +15,7 @@ def print_osc(address, *args):
 
 
 #MESSAGE HANDLERS
-#adress passes the OSC command that triggered the handler, *args is then an undefined sized tuple
+#address passes the OSC command that triggered the handler, *args is then an undefined sized tuple
 def preset_handler(address, *args): #should get str:preser_name
     match args[0]:
         case 'off':
@@ -74,9 +75,20 @@ def start_server():
     print("> !SERVER STARTED ON " + ip + ":" + str(port) + "! Listening in the background...")
     server.serve_forever()
 
+def poll_module():
+    msg = utils.rylr.receive()
+    if msg != None:
+        print("INCOMING: "+msg.data.decode('ascii'))
+        if msg.data.decode('ascii').startswith('init'): 
+            #process incomig request
+            pass
+    time.sleep(0.001) #here 0.001 -1ms- is the samlles safe value you can pass into cpythons sleep 
+
 # Start the server in a daemon thread
 server_thread = threading.Thread(target=start_server, daemon=True)
 server_thread.start()
+#Start module polling loop in another daemon thread
+module_thread = threading.Thread(target)
 
 # Start interactive shell (REPL) in main thread
 print("> Setup finished, opening REPL for debug...")#exit() or ctrl+D to exit repl, the daemon thread will be killed automatically

@@ -1,27 +1,11 @@
 import os
-import machine
 
-
-def file_system_setup(isverbose=False):
-    filestofind = ['boot.py', 'reyax.py', 'utils.py', 'jewelutils.py', 'servoutils.py', 'animationutils.py', 'animations.py']
-    for name in filestofind:
-        if name not in os.listdir() and isverbose:
-            print("!WARNING! "+name+" was not found in ./ directory")
-    if 'src' not in os.listdir():
-        os.mkdir('src')
-    for name in filestofind:
-        if not name == 'boot.py':
-            try: 
-                os.rename(name, 'src/'+name)
-            except:
-                if isverbose:
-                    print(f'!WARNING! {name} has not been relocated')
 
 def file_system_show():
+    '''prints pico filesystem'''
     __traverse('', 1)
 
-
-def __traverse(path, indent):
+def __traverse(path, indent): #recursion helper for file_system_show()
     for item in os.listdir(path):
         fullpath = path+'/'+item
         if not item.endswith('.py'):
@@ -50,5 +34,6 @@ def unpack_octal(packed: bytes) -> list:
     for shift in range(12, -1, -3):
         digits.append((bits >> shift) & 0b111)
     return digits
+
 
 

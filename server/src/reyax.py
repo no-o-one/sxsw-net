@@ -141,7 +141,7 @@ class RYLR998:
         except:
             return False
 
-    def address(self):
+    def get_address(self):
         self._uart.write(b"AT+ADDRESS?\r\n")
         resp = self._wait_for_response(1000)
         return int(resp.decode().strip().split("=")[1])
