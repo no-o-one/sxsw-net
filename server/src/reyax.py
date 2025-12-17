@@ -36,9 +36,20 @@ class ReceivedMessage:
             header, address = parts[0].split("=")
             self.address = int(address)
             self.length = int(parts[1])
-            self.data = parts[2].encode("ascii")  # leave as bytes
             self.RSSI = int(parts[3])
             self.SNR = int(parts[4])
+            if (parts[2] != parts[-3]):
+                i = 3
+                self.data = parts[2].encode("ascii")
+                self.data += (",".encode("ascii"))
+                while parts[i] != parts[-2]:
+                    self.data += parts[i].encode("ascii")
+                    self.data += (",".encode("ascii"))
+                    i+=1
+                self.data = self.data[:-1]
+            else:
+                self.data = parts[2].encode("ascii")  
+
         except Exception as e:
             raise Exception(f"Failed to parse message: {full_line} => {e}")
 

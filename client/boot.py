@@ -52,7 +52,7 @@ def listen_to_host(): #this is the second core functionality
                     except Exception as e:
                         print(e)
 
-                elif data_parsed[0] == 'nuke':#failsafe/remote debugging - deletes boot py in case it blocks serial/fails something else
+                elif data_parsed[0] == 'nuke':#failsafe/remote debugging - deletes boot py in case it blocks serial/something else fails 
                     print('got nuke, dleteing boot and restetting machine...')
                     os.remove('boot.py')
                     machine.reset()
@@ -142,7 +142,3 @@ print("working")
 #     except Exception as e:
 #         print_exception(e)
 #         break
-
-
-
-

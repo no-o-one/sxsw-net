@@ -22,10 +22,12 @@ class ReceivedMessage:
             if (parts[2] != parts[-3]):
                 i = 3
                 self.data = parts[2].encode("ascii")
+                self.data += (",".encode("ascii"))
                 while parts[i] != parts[-2]:
                     self.data += parts[i].encode("ascii")
-                    self.data += ",".encode("ascii")
-                self.data = self.data[1:-1]
+                    self.data += (",".encode("ascii"))
+                    i+=1
+                self.data = self.data[:-1]
             else:
                 self.data = parts[2].encode("ascii")  
 
