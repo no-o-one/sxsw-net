@@ -6,21 +6,21 @@
 Class controlling preipherals, animating between two set keyframes. Triggers `.set()` of the peripheral object in order to trigger hardware changes. Timing frame switches is implemented with virtual timers in order to be non blocking.
 
 ### Constructor
-| Arguments    | Type   | Default Value | Role                          |
-|-----------|--------|------------|---------------|
-| peripheral    | Servo/Neopixel class object     | *argument required* | peripheral object to be animated |
-| curve   | String | 'linear'    | motion curve fo the animation
-| length  | int  | *argument required*    | length of the animation in seconds |
-|fps|int|*argument required*|frames per second for the animation|
-|start_keyframe| int degrees 0-180, int brightness 0-255, or a list [R,G,B]| *argument required*|start keyframe
-|end_keyframe| int degrees 0-180, int brightness 0-255, or a list [R,G,B]| *argument required* |end keyframe
+| Argument       | Type                                                       | Default Value       | Role                                |
+|----------------|------------------------------------------------------------|---------------------|-------------------------------------|
+| peripheral     | Servo/Neopixel class object                                | *argument required* | peripheral object to be animated    |
+| curve          | String                                                     | 'linear'            | motion curve fo the animation       |
+| length         | int                                                        | *argument required* | length of the animation in seconds  |
+| fps            | int                                                        | *argument required* | frames per second for the animation |
+| start_keyframe | int degrees 0-180, int brightness 0-255, or a list [R,G,B] | *argument required* | start keyframe                      |
+| end_keyframe   | int degrees 0-180, int brightness 0-255, or a list [R,G,B] | *argument required* | end keyframe                        |
 
 ### play()
 Plays the animation - inits a timer that triggers `.set()`s  for the peripheral objects
 
-| Arguments    | Type   | Default Value | Role                          |
-|-------------|--------|---------------|---------------|
-| called_by_controller   | AnimationController obj | None | used for tracking current and the next queued AnimationInstances |
+| Argument             | Type                    | Default Value | Role                                                             |
+|----------------------|-------------------------|---------------|------------------------------------------------------------------|
+| called_by_controller | AnimationController obj | None          | used for tracking current and the next queued AnimationInstances |
 
 ### kill()
 Stops the animation - deinits the animation's timer, so all following frames are not rendered
@@ -39,10 +39,10 @@ Class queueing and managing `AnimationInstance` objects to create
 
 ### Constructor
 
-| Arguments    | Type   | Default Value | Role                          |
-|-----------|--------|------------|---------------|
-| sequence    | list of AnimationInstance objects    | *argument required* | stores the sequence of animations to be played one after another |
-| is_looping   | Boolean | True    | If True, the animation sequence will be played repeatedly until killed, if False, it will be played only once
+| Argument   | Type                              | Default Value       | Role                                                                                                          |
+|------------|-----------------------------------|---------------------|---------------------------------------------------------------------------------------------------------------|
+| sequence   | list of AnimationInstance objects | *argument required* | stores the sequence of animations to be played one after another                                              |
+| is_looping | Boolean                           | True                | If True, the animation sequence will be played repeatedly until killed, if False, it will be played only once |
 
 #### play()
 Plays the animation sequence - calls `.play()` on the first Instance in the sequence, which triggers the rest within the timer callback
@@ -61,12 +61,35 @@ Gets all instances of the class created then deinits all the individual Animatio
 
 
 
+## **src.reyaxclinet.RYRL998**
+Class for set-up and control of the lora module. Also handles proper formatting for the AT protocol
 
+### Constructor
+| Argument | Type                | Default Value       | Role                            |
+|----------|---------------------|---------------------|---------------------------------|
+| uart     | machine.UART object | *argument required* | uart the module is connected to |
 
+### send_blocking()
+Formats a "SEND" command for the module, sends over uart, then halts until a confirmation of a successful send is received form themodule
 
+| Argument | Type  | Default Value       | Role                                                  |
+|----------|-------|---------------------|-------------------------------------------------------|
+| address  | int   | *argument required* | address of the module to send to                      |
+| data     | bytes | *argument required* | data to send, if text, encode with `.encode("ascii")` |
 
+### send()
+Formats a "SEND" command for the module, sends over uart, yields control immediately
 
+| Argument | Type  | Default Value       | Role                                                  |
+|----------|-------|---------------------|-------------------------------------------------------|
+| address  | int   | *argument required* | address of the module to send to                      |
+| data     | bytes | *argument required* | data to send, if text, encode with `.encode("ascii")` |
 
+### check_send_status()
+tbd for now
+
+### receive()
+If has a received message in the buffer, parses using `ReceivedMessage`'s `.parse()`, returns a `ReceivedMessage` object
 
 
 
