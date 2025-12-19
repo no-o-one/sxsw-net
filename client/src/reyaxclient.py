@@ -45,12 +45,13 @@ class RYLR998:
         self._pending_cmd = None
         self._pending_cmd_start = 0
         self._pending_cmd_timeout = 0
-        # self._last_send_status = None
+        self._last_send_status = None #note: i commented it out for reasons unknown, if breaks comment out again
 
         while self._uart.any():
             self._uart.read()
 
     def send_blocking(self, address: int, data: bytes):
+        '''sends AT+SEND message, halts until AT+OK is received'''
         if len(data) > 240:
             raise ValueError("Data too long (>240 bytes)")
 
@@ -66,12 +67,12 @@ class RYLR998:
             raise ValueError("Data too long (>240 bytes)")
         cmd = b"AT+SEND=%d,%d," % (address, len(data)) + data + b"\r\n"
         self._uart.write(cmd)
-        self._pending_cmd = "send"
-        self._pending_cmd_start = time.ticks_ms()
+        self._pending_cmd = "send" #track what no-confirmation command was sent last
+        self._pending_cmd_start = time.ticks_ms() #track when was sent
         self._pending_cmd_timeout = 8000
-        self._last_send_status = None
+        self._last_send_status = None 
 
-    def check_send_status(self):
+    def check_send_status(self): #generated with AI at first, TODO: need the functionality so rewrite by hand so it actually works as its supposed to 
         """Returns True if +OK received, False if still waiting, raises if failed."""
         if self._last_send_status is not None:
             return self._last_send_status
@@ -93,7 +94,7 @@ class RYLR998:
         return False
 
     def receive(self):
-        """Returns ReceivedMessage if available, otherwise None. Non-blocking."""
+        """returns ReceivedMessage if found +RCV in the rxbuffer (deletes form the buffer afterwards), otherwise None. Non-blocking."""
         self._collect_rx()
         start = self._rxbuf.find(b"+RCV=")
         if start == -1:
@@ -102,12 +103,13 @@ class RYLR998:
         if end == -1:
             return None  # Not complete yet
         msg_line = self._rxbuf[start:end+2]
-        self._rxbuf = self._rxbuf[:start] + self._rxbuf[end+2:]
+        self._rxbuf = self._rxbuf[:start] + self._rxbuf[end+2:] #deletes the message from the rx buffer
         msg = ReceivedMessage()
         msg.parse(msg_line)
         return msg
 
     def _collect_rx(self):
+        '''reads uart's rx, stores in the buffer. the buffer (if implemented properly) should not store anything permanently, but currently does bc of bad AI code'''
         data = self._uart.read()
         if data:
             self._rxbuf += data
