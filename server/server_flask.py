@@ -3,8 +3,6 @@ import serial.tools.list_ports
 import code
 
 import src.reyax as reyax
-import src.utils as utils
-from src.Mesh import *
 import src.pyserialwrapper as pyserialwrapper
 import time
 
@@ -15,32 +13,42 @@ import time
 app = Flask(__name__)
 
 
-#first list al of the ports available on the device and compare prior to/after plugging hte module in
-print("> current port list \n")
-ports = serial.tools.list_ports.comports()
-available_ports = []
-for port in ports:
-    print(f"Port: {port.device} | Description: {port.description}")
-    available_ports.append(port.device)
-print("\n")
 
-input("> press enter when plugged in the module \n")
-
-print("> new port list \n")
-ports = serial.tools.list_ports.comports()
-available_ports = []
-for port in ports:
-    print(f"Port: {port.device} | Description: {port.description}")
-    available_ports.append(port.device)
-print("\n")
-
-#prompt for portname to connect
-port = input("> enter the port name the rylr should be on \n")
+def hex_to_rgb(hex):
+    return tuple(int(hex[i:i+2],16) for i in (0, 2, 4))
 
 
+def send_params(json):
+    #preprocess
+    type_nkwrd = json["from"]
+    from_nkwrd = json["from"]
+    to = json["to"]
+    time_nkwrd = json["time"]
+    curve = json["curve"]
+    #conversions
+    #convert float to 10-170 val and hex to rgb sequence
+    if type(from_nkwrd == float) and type(to == float):
+        from_nkwrd = (from_nkwrd*160)+10
+        from_nkwrd = str(int(from_nkwrd))
 
-def send_params():
-    pass
+        to = (to*160)+10
+        to = str(int(to))
+    elif type(from_nkwrd == str) and type(to == str):
+        from_nkwrd = hex_to_rgb(from_nkwrd)
+        from_nkwrd = (f"{str(from_nkwrd[0])} {str(from_nkwrd[1])} {str(from_nkwrd[2])}")
+    
+        to = hex_to_rgb(to)
+        to = (f"{str(to[0])} {str(to[1])} {str(to[2])}")
+    
+    time_nkwrd = str((time_nkwrd/1000))
+
+    if type_nkwrd == "color":
+        type_nkwrd = "this_jewel"
+    elif type_nkwrd == "position":
+        type_nkwrd = "this_servo"
+
+    cmd = f"cmd {type_nkwrd} {from_nkwrd} {to} {time_nkwrd} {curve}"
+    rylr.send(1, cmd.enconde('ascii'))
 
 
 
@@ -109,38 +117,42 @@ def reset():
 
 
 # === Flask routes that trigger your functions ===
-@app.route('/run-close', methods=['POST', 'GET'])
-def run_close():
-    Thread(target=demo_talk_kill).start()  # Run asynchronously
-    return jsonify({"status": "task_one started"}), 200
-
-@app.route('/run-warmup', methods=['POST', 'GET'])
-def run_warmup():
-    Thread(target=warmup).start()  # Run asynchronously
-    return jsonify({"status": "task_two started"}), 200
-
-@app.route('/run-talk-loop', methods=['POST', 'GET'])
+@app.route('/', methods=['POST'])
 def run_loop_example():
-    Thread(target=demo_talk).start()  # Run asynchronously
-    return jsonify({"status": "task_two started"}), 200
-
-@app.route('/', methods=['POST', 'GET'])
-def run_loop_example():
-    #preprocess
-    #send params async style
-    Thread(target=send_params).start()  # Run asynchronously
-    return jsonify({"status": "task_two started"}), 200
-
-# === Function to start Flask server ===
-def run_flask_app():
-    app.run(debug=True, use_reloader=False, host='0.0.0.0', port=5000)
-
-# === Start Flask in background thread ===
-flask_thread = Thread(target=run_flask_app, daemon=True)
-flask_thread.start()
+    #check if json
+    content_type = request.headers.get('Content-Type')
+    if (content_type == 'application/json'):
+        json = request.json#dict type
+        #send params in a separate thread
+        Thread(target=send_params, args=(json)).start()  # Run asynchronously
+    else:
+        print("content type not json")
+    
 
 
 
+
+#first list al of the ports available on the device and compare prior to/after plugging hte module in
+print("> current port list \n")
+ports = serial.tools.list_ports.comports()
+available_ports = []
+for port in ports:
+    print(f"Port: {port.device} | Description: {port.description}")
+    available_ports.append(port.device)
+print("\n")
+
+input("> press enter when plugged in the module \n")
+
+print("> new port list \n")
+ports = serial.tools.list_ports.comports()
+available_ports = []
+for port in ports:
+    print(f"Port: {port.device} | Description: {port.description}")
+    available_ports.append(port.device)
+print("\n")
+
+#prompt for portname to connect
+port = input("> enter the port name the rylr should be on \n")
 
 
 #connect to module
@@ -151,6 +163,8 @@ try:
     rylr.address = 65535
     if not rylr.pulse:
         print('!WARNING! LoRa module test failed')
+    else:
+        print("connected")
 except Exception as e:
     print(f'!WARNING! Connection to LoRa at {port} with baudrate {baudrate} failed with the following: \n{e}')
 
@@ -161,4 +175,14 @@ code.interact(local=locals())
 print("> REPL exited, killing all threads...")
 
 
+
+
+
+# === Function to start Flask server ===
+def run_flask_app():
+    app.run(debug=True, use_reloader=False, host='0.0.0.0', port=5000)
+
+# === Start Flask in background thread ===
+flask_thread = Thread(target=run_flask_app, daemon=True)
+flask_thread.start()
 
