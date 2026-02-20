@@ -39,12 +39,7 @@ All the files running server side - on the QLAB_maincomputer - are located in th
 module listening logic is now implemented server side too
 
 **To start the server:** 
-1. open terminal and plug in the LoRa module 
-2. run `ls /dev/tty.*`  to check the list of available ports, the one you are looking for will look something like `/dev/tty.usbserial-XX` (idk why yet but the port number changes every time you plug the module in)
-3. open `lightserver.py` and replace `port = '/dev/tty.usbserial-XX'` on line 13 with the LoRa module port
-4. in the terminal navigate to the directory where you placed the contents of the `server` folder
-5. make `runme.sh` executable via running `chmod +x runme.sh`, then 
-then execute it with `./runme.sh`
+run `server/server_flask.py` from terminal
 <br>
 
 ### runme.sh
