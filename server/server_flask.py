@@ -37,7 +37,13 @@ print("\n")
 #prompt for portname to connect
 port = input("> enter the port name the rylr should be on \n")
 
-#connect to module
+
+
+def send_params():
+    pass
+
+
+
 def bandf():
     for i in range(1, 100):
         rylr.send(1, b"pyexec this_servo.set(15)") 
@@ -118,9 +124,16 @@ def run_loop_example():
     Thread(target=demo_talk).start()  # Run asynchronously
     return jsonify({"status": "task_two started"}), 200
 
+@app.route('/', methods=['POST', 'GET'])
+def run_loop_example():
+    #preprocess
+    #send params async style
+    Thread(target=send_params).start()  # Run asynchronously
+    return jsonify({"status": "task_two started"}), 200
+
 # === Function to start Flask server ===
 def run_flask_app():
-    app.run(debug=False, use_reloader=False, host='0.0.0.0', port=5000)
+    app.run(debug=True, use_reloader=False, host='0.0.0.0', port=5000)
 
 # === Start Flask in background thread ===
 flask_thread = Thread(target=run_flask_app, daemon=True)
@@ -130,6 +143,7 @@ flask_thread.start()
 
 
 
+#connect to module
 baudrate = 115200
 try:
     uart = pyserialwrapper.pyserialUARTwrapper(port, baudrate)
