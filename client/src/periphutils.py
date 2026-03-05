@@ -1,5 +1,6 @@
 import machine  # type:ignore
 import rp2
+import time
 
 
 rp2.PIO(0).remove_program()
@@ -57,14 +58,21 @@ class Servo():
         self.last_angle = last_angle
 
     def set(self, angle):
-      
-        min_duty = 1400 
-        max_duty = 7700
+        
+        min_duty = 1730
+        max_duty = 7070
         duty = int(min_duty + ((angle / 180) * (max_duty - min_duty)))
-        print("set to %d", int(duty))
+        
+
         self.pwm_pin.duty_u16(duty)
+        if (self.last_angle-angle) < -10 or (self.last_angle-angle) > 10: #safeguard if difference more than 10 deg in two requests
+            time.sleep_ms(1000)
+            
+        self.last_angle = angle
  
  
+
+
 
 
 

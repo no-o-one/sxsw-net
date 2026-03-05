@@ -59,11 +59,11 @@ def listen_to_host(): #this is the second core functionality
                     
                 elif data_parsed[0] == 'cmd':
                     if data_parsed[1] == "position":
-                        this_anim = AnimationInstance(this_servo, data_parsed[5], float(data_parsed[4]), 60, int(data_parsed[2]), int(data_parsed[3]))
+                        this_anim = AnimationInstance(this_servo, data_parsed[5], float(data_parsed[4]), 30, int(data_parsed[2]), int(data_parsed[3]))
                         this_anim.play()
                         del this_anim
                     else:
-                        this_anim = AnimationInstance(this_jewel, data_parsed[9], float(data_parsed[8]), 60,
+                        this_anim = AnimationInstance(this_jewel, data_parsed[9], float(data_parsed[8]), 30,
                                  [int(data_parsed[2]), int(data_parsed[3]), int(data_parsed[4])], 
                                      [int(data_parsed[5]), int(data_parsed[6]), int(data_parsed[7])])
         
@@ -155,3 +155,4 @@ print("working")
 #     except Exception as e:
 #         print_exception(e)
 #         break
+

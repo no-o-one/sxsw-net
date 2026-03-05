@@ -14,6 +14,7 @@ import time
 app = Flask(__name__)
 
 
+
 def hex_to_rgb(hex):
     return tuple(int(hex[i:i+2],16) for i in (0, 2, 4))
 
@@ -44,8 +45,8 @@ def send_params(json):
     time_nkwrd = str((time_nkwrd/1000))
 
     cmd = f"cmd {type_nkwrd} {from_nkwrd} {to} {time_nkwrd} {curve}"
-    print(cmd)
     rylr.send(1, cmd.encode('ascii'))
+
 
 
 
@@ -54,7 +55,9 @@ from flask import request, jsonify
 from threading import Thread
 
 @app.route('/', methods=['POST'])
-def route_json():
+def run_loop_example():
+    print("hi")
+
     content_type = request.headers.get('Content-Type')
     print("Content-Type:", content_type)
 
@@ -79,29 +82,9 @@ def run_flask_app():
 flask_thread = Thread(target=run_flask_app, daemon=True)
 flask_thread.start()
 
-#PORT PROMPTING, UNCOMMENT IF NEEDED
-# print("> current port list \n")
-# ports = serial.tools.list_ports.comports()
-# available_ports = []
-# for port in ports:
-#     print(f"Port: {port.device} | Description: {port.description}")
-#     available_ports.append(port.device)
-# print("\n")
 
-# input("> press enter when plugged in the module \n")
-
-# print("> new port list \n")
-# ports = serial.tools.list_ports.comports()
-# available_ports = []
-# for port in ports:
-#     print(f"Port: {port.device} | Description: {port.description}")
-#     available_ports.append(port.device)
-# print("\n")
-
-# #prompt for portname to connect
-# port = input("> enter the port name the rylr should be on \n")
-
-port = "COM5"#CHANGE PORT HERE
+#prompt for portname to connect
+port = "COM5" #USB PORT
 
 
 #connect to module
