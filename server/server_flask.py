@@ -35,10 +35,11 @@ def send_params(json):
 
         to = (to*160)+10
         to = str(int(to))
-    elif type(from_nkwrd == str) and type(to == str):
+
+    elif (type(from_nkwrd == str) and type(to == str)) and (from_nkwrd != "-" and to != "-"):
         from_nkwrd = hex_to_rgb(from_nkwrd)
         from_nkwrd = (f"{str(from_nkwrd[0])} {str(from_nkwrd[1])} {str(from_nkwrd[2])}")
-    
+
         to = hex_to_rgb(to)
         to = (f"{str(to[0])} {str(to[1])} {str(to[2])}")
     

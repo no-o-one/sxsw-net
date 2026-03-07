@@ -27,7 +27,7 @@ def jewel_set_pio(): #one instruction here will cost 1 clock cycle btw
 
 class Neopixel():
     #TODO: implement @property and checks
-    def __init__(self, data_pin=15, state_machine_id=0, pixels_amount=7):
+    def __init__(self, data_pin=26, state_machine_id=0, pixels_amount=7):
         '''ARGS>  data_pin:int, state_machine_id:int, pixels_amount:int'''
         self.data_pin = machine.Pin(data_pin)
         self.state_machine_id = state_machine_id
@@ -51,7 +51,7 @@ class Neopixel():
 
 class Servo():
     #TODO: implement @property and checks
-    def __init__(self, pwm_pin=14, last_angle=180):
+    def __init__(self, pwm_pin=22, last_angle=180):
         '''ARGS>  pwm_pin:int, last_angle:int'''
         self.pwm_pin = machine.PWM(machine.Pin(pwm_pin))
         self.pwm_pin.freq(50) # 50Hz for servo control
@@ -71,6 +71,7 @@ class Servo():
         self.last_angle = angle
  
  
+
 
 
 
