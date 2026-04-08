@@ -8,8 +8,8 @@
 - TP4056 battery charging module
 - MG90S servo
 - RGB Neopixel Jewel
-- [DC to DC boost converter](https://www.amazon.com/DAOKI-Converter-Step-Up-Voltage-Regulator/dp/B08M19C7MM?crid=2Z80V26U1QVNL&dib=eyJ2IjoiMSJ9.Qu6yC0sr46xT-JAlyuJRzMTYiKvKh89AE1XABqWGHhNNgBk0eLLyxLVy9oL219KJTXiAPqcuAmJJ_WomyVOTeuR1RlZMRXPUkYm49GQhe_heYbUgc3ksa3DgdwdUgDHIkLuI8o_-suwRAgCDIW5fUdif0F6P_ClVGuPOfintIyflluvBdzqBDDhdwKS39F16DTimaVabgTgv5oC3Ph8CAgFVraVQrbnluZtHHfov88TOu8oDAoefKvEQsJ80pV3HnhjWI6ngREmsI00DgFXexjPBbMHlJWpUKmtKHKJK4cw.zKg7F-Nb-AHJbabyyR5hGbe-BdNrHKMpqnqtsgKUoBs&dib_tag=se&keywords=5PCS+Mini+DC-DC+Boost+Converter+Module+3V+3.2V+3.3V+3.7V+5V+daoki&qid=1749086221&s=industrial&sprefix=5pcs+mini+dc-dc+boost+converter+module+3v+3.2v+3.3v+3.7v+5v+daoki%2Cindustrial%2C88&sr=1-1)
-- [LiPo battery](https://www.amazon.com/MakerHawk-Rechargeable-Protection-Insulated-Development/dp/B0D3LQYX49?crid=1K4DD4ZHQ2VU&dib=eyJ2IjoiMSJ9.G9aP9TyJvjZBgUriALDk29xUXo27E5d8WCr3MoXgE4bsmJiwRk4wo4RiBkay8IykeUrdLTh6KfdLOtc9XFipuJQbsI1T5zSHNV-EwGU0c3DpY6Bm33SdK4NB71gpHLIhRpkZoV9u5NrZOZ1CURmF0qXFqY1KwC6xh4Re4-CAZoz1vOCPvA-m8RfAh2UvqV_pub_kO9XaWJ-FlOnbBVRG3KS03gWG304gZnPwuOFUQ-6ws8WtNLfDtoDQIotgizby0c4bKDhc0kl8lg_yBS2QfsKIigYtcKHT42n9DWKmRHo.vYT9wqxEeYm3QDWNJO025HJYn5YICWZT0Y32thY9txk&dib_tag=se&keywords=3.7v%2Blipo%2Bbattery%2B2200%2BmAh&qid=1749089366&s=electronics&sprefix=3.7v%2Blipo%2Bbattery%2B2200%2Bmah%2Celectronics%2C112&sr=1-3&th=1)
+- [buck-boost converter](https://www.digikey.com/en/products/detail/pololu/4085/16164508)
+- 5000mah lipo battery
 - [Digital logic converter](https://www.amazon.com/HiLetgo-Channels-Converter-Bi-Directional-3-3V-5V/dp/B07F7W91LC?dib=eyJ2IjoiMSJ9.TqJrQIEBEbX7U7-p-JXMtot7qk-d2R3iy6-ft_7cqKVjsitywtM507CSkx-iBJYruMYBBRdKk_EqBEWVXMcE-ZG0ObN6i_4276lUMBv90DqiQZpjoEaMH03OAT-GopwVXZxK2KbWCKEEgcjITcCb5GDpg47eDJICTyV3Oz94jA2f8lle--WZZH1dWgZ6AUC-tonyFv3-zcr-RyT_jxQOatYUfFmL4U-Noss5ZeCVoSo._Yw2--RAlmwcyBRwYUqSSJBe-sBoGEjMQcbOkXBi5x4&dib_tag=se&keywords=3.3v+5v+logic+level+converter&qid=1749501269&sr=8-3)
 - [Gear's bearings x2](https://www.mcmaster.com/5909K12/)
 - [Aligner's bearing](https://www.mcmaster.com/5905K528/)
@@ -34,7 +34,7 @@ Module ids range 1-65535. 0 address cannot be addressed individually, all commun
 
 All the files running server side - on the QLAB_maincomputer - are located in the `server folder`, all of the ones running locally on each node are in the `client folder` of this repo
 
-
+#[THE FOLLOWING CAN BE SLIGHTLY OUTDATED]
 ## Server side
 module listening logic is now implemented server side too
 
