@@ -6,8 +6,8 @@
 - Non W Raspberry Pi pico with RP2040 flashed with [Micropython v1.125.0](https://micropython.org/download/RPI_PICO/)
 - RYLR998 LoRa Module
 - TP4056 battery charging module
-- MG90S servo
-- RGB Neopixel Jewel
+- MG996R servo
+- RGB Neopixel Jewel board
 - [buck-boost converter](https://www.digikey.com/en/products/detail/pololu/4085/16164508)
 - 5000mah lipo battery
 - [Digital logic converter](https://www.amazon.com/HiLetgo-Channels-Converter-Bi-Directional-3-3V-5V/dp/B07F7W91LC?dib=eyJ2IjoiMSJ9.TqJrQIEBEbX7U7-p-JXMtot7qk-d2R3iy6-ft_7cqKVjsitywtM507CSkx-iBJYruMYBBRdKk_EqBEWVXMcE-ZG0ObN6i_4276lUMBv90DqiQZpjoEaMH03OAT-GopwVXZxK2KbWCKEEgcjITcCb5GDpg47eDJICTyV3Oz94jA2f8lle--WZZH1dWgZ6AUC-tonyFv3-zcr-RyT_jxQOatYUfFmL4U-Noss5ZeCVoSo._Yw2--RAlmwcyBRwYUqSSJBe-sBoGEjMQcbOkXBi5x4&dib_tag=se&keywords=3.3v+5v+logic+level+converter&qid=1749501269&sr=8-3)
