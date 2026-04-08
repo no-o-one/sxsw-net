@@ -35,7 +35,10 @@ class AnimationInstance():
         self.peripheral = peripheral
         self.curve = curve
         self.length = length
-        self.fps = fps
+        if type(peripheral) == Servo and fps > 48: #safeguarss so that there is no attempt to execute a 50 hz signal more than 50 times a second
+            self.fps = 48
+        else:
+            self.fps = fps 
         self.total_frames = self.length * self.fps #used for tracking current frames and calculating values with animation curves
         self.ms_between_frames = int(1000 / self.fps) #used for tracking current frames and calculating values with animation curves
         self.start_keyframe = start_keyframe 

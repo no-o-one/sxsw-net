@@ -66,7 +66,7 @@ class Servo():
 
         self.pwm_pin.duty_u16(duty)
         if (self.last_angle-angle) < -10 or (self.last_angle-angle) > 10: #safeguard if difference more than 10 deg in two requests
-            time.sleep_ms(1000)
+            time.sleep_ms(500)
             
         self.last_angle = angle
  
